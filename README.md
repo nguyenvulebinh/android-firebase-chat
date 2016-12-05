@@ -15,8 +15,9 @@ Hình 1. Giao diện chính của app chat
 	- Khi bấm vào 1 item(bạn bè hoặc nhóm) thì mở ra màn hình chat.
 	- Thành viên có thể rời khỏi nhóm
 	- Admin(người tạo nhóm): kích thành viên khỏi nhóm, xóa nhóm, thêm thành viên  
-<img src='https://github.com/HieuApp/android-firebase-chat/blob/master/ql-nhom.jpg' width='300'/>
+<img src='https://github.com/HieuApp/android-firebase-chat/blob/master/ql-nhom.jpg' width='300'/>  
 Hình 2. popup quản lý thành viên nhóm.  
+
 **3. Notification**  
 * Hiển thị notification trên statusbar khi có tin nhắn mới
 * Tin nhắn chưa đọc bôi đậm  
