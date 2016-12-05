@@ -8,7 +8,7 @@
 
 **2. Chat, chat nhóm**  
 Giao diện chính khi vào app là 1 activity gồm 2 tab: Bạn bè, nhóm
-![Image of Chatapp](https://github.com/HieuApp/android-firebase-chat/blob/master/rivchat.png)
+![Image of Chatapp](https://github.com/HieuApp/android-firebase-chat/blob/master/rivchat.png =250x)
 Hình 1. Giao diện chính của app chat
 * Bạn bè: danh sách dạng list có avatar, tên, text chat cuối cùng (nếu đã từng chat). Cho phép thêm bạn, xóa bạn
 * Nhóm: danh sách dạng list, tên nhóm, avatar là chữ cái đầu của tên nhóm.
