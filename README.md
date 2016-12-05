@@ -8,14 +8,14 @@
 
 **2. Chat, chat nhóm**  
 Giao diện chính khi vào app là 1 activity gồm 2 tab: Bạn bè, nhóm
-![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
+![Image of Chatapp](https://github.com/HieuApp/android-firebase-chat/blob/master/rivchat.png)
 Hình 1. Giao diện chính của app chat
 * Bạn bè: danh sách dạng list có avatar, tên, text chat cuối cùng (nếu đã từng chat). Cho phép thêm bạn, xóa bạn
 * Nhóm: danh sách dạng list, tên nhóm, avatar là chữ cái đầu của tên nhóm.
 	- Khi bấm vào 1 item(bạn bè hoặc nhóm) thì mở ra màn hình chat.
 	- Thành viên có thể rời khỏi nhóm
 	- Admin(người tạo nhóm): kích thành viên khỏi nhóm, xóa nhóm, thêm thành viên
-Hình 2. popup quản lý thành viên nhóm.
+Hình 2. popup quản lý thành viên nhóm.  
 **Notification**  
 * Hiển thị notification trên statusbar khi có tin nhắn mới
 * Tin nhắn chưa đọc bôi đậm
