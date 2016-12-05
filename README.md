@@ -14,7 +14,8 @@ Hình 1. Giao diện chính của app chat
 * Nhóm: danh sách dạng list, tên nhóm, avatar là chữ cái đầu của tên nhóm.
 	- Khi bấm vào 1 item(bạn bè hoặc nhóm) thì mở ra màn hình chat.
 	- Thành viên có thể rời khỏi nhóm
-	- Admin(người tạo nhóm): kích thành viên khỏi nhóm, xóa nhóm, thêm thành viên
+	- Admin(người tạo nhóm): kích thành viên khỏi nhóm, xóa nhóm, thêm thành viên  
+
 Hình 2. popup quản lý thành viên nhóm.  
 **3. Notification**  
 * Hiển thị notification trên statusbar khi có tin nhắn mới
