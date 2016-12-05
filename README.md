@@ -1,5 +1,5 @@
 # RivChat - Android chat app base on Firebase.  
-## Tính năng  
+### Tính năng  
 **1. Quản lý tài khoản**  
 * Đăng ký: Cho phép user đăng ký tài khoản bằng email và password
 * Đăng nhập: user phải đăng nhập mới được sử dụng app
@@ -22,6 +22,6 @@ Hình 2. popup quản lý thành viên nhóm.
 * Hiển thị notification trên statusbar khi có tin nhắn mới
 * Tin nhắn chưa đọc bôi đậm  
 
-**Yêu cầu**
+### Yêu cầu  
 * PTTK HT: Usecase, Biểu đồ trình tự, hoạt động, biểu đồ lớp. 
 
