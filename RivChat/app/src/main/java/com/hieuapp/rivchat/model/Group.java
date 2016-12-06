@@ -5,5 +5,4 @@ package com.hieuapp.rivchat.model;
  */
 
 public class Group {
-    private String groupName;
 }
