@@ -59,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/selector_bg_edit"
                         android:hint="@string/Username"
-                        android:inputType="textPersonName"
+                        android:inputType="textEmailAddress"
                         android:paddingBottom="2dp"
                         android:textColor="#2fa881"
                         android:textCursorDrawable="@drawable/bg_input_cursor"
@@ -117,7 +117,8 @@
                 android:layout_marginTop="5dp"
                 android:text="@string/forgot_your_password"
                 android:textColor="#9a9a9a"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:onClick="clickResetPassword"/>
         </LinearLayout>
     </android.support.v7.widget.CardView>
 
@@ -129,7 +130,7 @@
         android:layout_alignTop="@id/cv"
         android:layout_marginEnd="-20dp"
         android:layout_marginTop="25dp"
-        android:onClick="clickRegister"
+        android:onClick="clickRegisterLayout"
         android:src="@drawable/ic_signup"
         android:transitionName="loginFab"
         app:fabSize="normal" />
