@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initTab(){
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorIndivateTab));
         setSupportActionBar(toolbar);
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
