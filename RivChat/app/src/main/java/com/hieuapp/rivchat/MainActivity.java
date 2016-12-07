@@ -1,5 +1,6 @@
 package com.hieuapp.rivchat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -15,11 +16,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hieuapp.rivchat.ui.FriendsFragment;
 import com.hieuapp.rivchat.ui.GroupFragment;
+import com.hieuapp.rivchat.ui.LoginActivity;
 import com.hieuapp.rivchat.ui.UserProfileFragment;
 
 import java.util.ArrayList;
@@ -29,9 +32,10 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private static String TAG = "MainActivity";
-//    private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
+    public static int REQUEST_CODE_LOGIN = 1000;
+    private boolean tempLogin = false;
 
     @Override
     protected void onStart() {
@@ -43,10 +47,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        toolbar = (Toolbar) findViewById(R.id.toolbar);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
-//        setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,11 +58,13 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
         initTab();
         initAuth();
     }
 
+    /**
+     * Khoi tao 3 tab
+     */
     private void initTab(){
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorIndivateTab));
         setupViewPager(viewPager);
@@ -102,12 +106,23 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
-                    // User is signed out
+                    // User is signed out, start activity login
+                    if(!tempLogin)
+                    startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
                 // ...
             }
         };
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK){
+            tempLogin = true;
+            Toast.makeText(this, "Hello" + data.getStringExtra("username"), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

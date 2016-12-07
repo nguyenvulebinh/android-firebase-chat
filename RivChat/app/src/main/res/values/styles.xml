@@ -15,6 +15,14 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="TransparentTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#03A9F4</item>
+        <item name="colorPrimaryDark">#0288D1</item>
+        <item name="colorAccent">#4fa881</item>
+        <item name="android:windowBackground">@color/transparent</item>
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
@@ -23,9 +31,11 @@
         <item name="colorControlActivated">#FFCC00</item>
     </style>
     <style name="Translucent" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#03A9F4</item>
         <item name="colorPrimaryDark">#0288D1</item>
+        <item name="colorAccent">#4fa881</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
-
     </style>
 </resources>

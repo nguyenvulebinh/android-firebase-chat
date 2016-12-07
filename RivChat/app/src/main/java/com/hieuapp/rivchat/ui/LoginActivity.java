@@ -35,4 +35,12 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(this, RegisterActivity.class));
         }
     }
+
+    public void clickLogin(View view) {
+        Intent data = new Intent();
+        data.putExtra("username", "nguyenbinh");
+        data.putExtra("password", "123456");
+        setResult(RESULT_OK, data);
+        finish();
+    }
 }

@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.LoginActivity"
+            android:theme="@style/Translucent"
             />
         <activity android:name=".ui.RegisterActivity"
             android:theme="@style/Translucent" />
