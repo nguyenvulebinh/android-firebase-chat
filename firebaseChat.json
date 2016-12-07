@@ -1,0 +1,45 @@
+message =  {
+	"99siwjcnsflaksfjsf":{
+		"idSender": 67890,
+		"idReceiver": 332092902394243,
+		"text": "hello",
+		"timestamp": 61839323949234924
+	}
+	
+};
+
+friends = {
+	"9sjsfksakfjsf":{
+		"idUser1": 929382394824,
+		"idUser2": 93392903492493 
+	}
+}
+
+room = {
+	"lsakjflkasjf":{
+		"name": "Bkav",
+		"member":{
+			"idUser1": 990239243,
+			"idUser2": 88737323,
+		},
+		"admin": 990239243,	
+
+	}
+}
+
+user={
+	"2iwoer023rwr":{
+		"name": "Hieu",
+		"email": "abc@gamil.com",
+		"status":{
+			"isOnline": true,
+			"timestamp": 9823902392323
+		},
+		"message":{
+			"idSender": 67890,
+			"idReceiver": 332092902394243,
+			"text": "hello",
+			"timestamp": 61839323949234924
+		}
+	}
+}
