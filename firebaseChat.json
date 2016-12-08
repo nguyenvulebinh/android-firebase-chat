@@ -1,9 +1,11 @@
 message =  {
-	"99siwjcnsflaksfjsf":{
-		"idSender": 67890,
-		"idReceiver": 332092902394243,
-		"text": "hello",
-		"timestamp": 61839323949234924
+	"id_room":{
+		"sdfaksdfbkasjfd":{
+			"idSender": 67890,
+			"idReceiver": 332092902394243,
+			"text": "hello",
+			"timestamp": 61839323949234924
+		}
 	}
 	
 };
@@ -16,14 +18,16 @@ friends = {
 }
 
 room = {
-	"lsakjflkasjf":{
-		"name": "Bkav",
+	"id_room":{
 		"member":{
 			"idUser1": 990239243,
 			"idUser2": 88737323,
 		},
-		"admin": 990239243,	
-
+		"isGroup": true,
+		"groupInfo":{
+			"name": "Bkav",
+			"admin": 990239243
+		}	
 	}
 }
 
@@ -34,13 +38,13 @@ user={
 		"avata": "base64",
 		"status":{
 			"isOnline": true,
-			"timestamp": 9823902392323
+			"timestamp": 0
 		},
 		"message":{
-			"idSender": 67890,
-			"idReceiver": 332092902394243,
-			"text": "hello",
-			"timestamp": 61839323949234924
+			"idSender": 0,
+			"idReceiver": 0,
+			"text": "",
+			"timestamp": 0
 		}
 	}
 }
