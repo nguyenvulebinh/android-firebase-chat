@@ -17,3 +17,12 @@
 #}
 -keepattributes Signature
 -keepattributes *Annotation*
+# Add this global rule
+-keepattributes Signature
+
+# This rule will properly ProGuard all the model classes in
+# the package com.yourcompany.models. Modify to fit the structure
+# of your app.
+-keepclassmembers class com.hieuapp.rivchat.** {
+  *;
+}

@@ -5,6 +5,6 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorIndivateTab">#FFFFFF</color>
     <color name="transparent">#00000000</color>
-    
+    <color name="colorCardView">#f7f7f7</color>
     <color name="grey_200">#EEEEEE</color>
 </resources>

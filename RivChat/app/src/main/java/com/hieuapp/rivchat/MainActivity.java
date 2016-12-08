@@ -1,6 +1,10 @@
 package com.hieuapp.rivchat;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -11,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -22,18 +27,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.ui.FriendsFragment;
 import com.hieuapp.rivchat.ui.GroupFragment;
 import com.hieuapp.rivchat.ui.LoginActivity;
 import com.hieuapp.rivchat.ui.RegisterActivity;
 import com.hieuapp.rivchat.ui.UserProfileFragment;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     private static String TAG = "MainActivity";
     private ViewPager viewPager;
     private TabLayout tabLayout;
@@ -41,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
     public static String STR_EXTRA_ACTION = "action";
     public static String STR_EXTRA_USERNAME = "username";
     public static String STR_EXTRA_PASSWORD = "password";
+    public static String STR_DEFAULT_BASE64 = "default";
 
+    private AuthUtils authUtils;
     private static boolean haveActivityResult;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser user;
+    private DatabaseReference mFirebaseDatabaseReference;
 
     @Override
     protected void onStart() {
@@ -68,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         });
         haveActivityResult = true;
         initTab();
-        initAuth();
+        initFirebase();
     }
 
     /**
@@ -105,12 +120,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Khởi tạo các thành phần cần thiết cho việc quản lý đăng nhập
      */
-    private void initAuth() {
+    private void initFirebase() {
+        //Khoi tao thanh phan de dang nhap, dang ky
         mAuth = FirebaseAuth.getInstance();
+        authUtils = new AuthUtils();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
                     Toast.makeText(MainActivity.this, "Uid: " + user.getUid(), Toast.LENGTH_SHORT).show();
@@ -126,68 +143,9 @@ public class MainActivity extends AppCompatActivity {
                 // ...
             }
         };
-    }
 
-    /**
-     * Action register
-     * @param email
-     * @param password
-     */
-    private void createUser(String email, String password) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Register false", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Register ok", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-
-    /**
-     * Action Login
-     * @param email
-     * @param password
-     */
-    private void signIn(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail:failed", task.getException());
-                            Toast.makeText(MainActivity.this, "Login false", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Login ok", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-    private void resetPassword(final String email){
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Sent email to " + email, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        //Khoi tao realtime database
+        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
@@ -196,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
         haveActivityResult = true;
         if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
             if (data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_LOGIN)) {
-                signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+                authUtils.signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
             } else if (data.getStringExtra(STR_EXTRA_ACTION).equals(RegisterActivity.STR_EXTRA_ACTION_REGISTER)) {
-                createUser(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+                authUtils.createUser(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
             }else if(data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_RESET)){
-                resetPassword(data.getStringExtra(STR_EXTRA_USERNAME));
+                authUtils.resetPassword(data.getStringExtra(STR_EXTRA_USERNAME));
             }
         } else if (resultCode == RESULT_CANCELED) {
             this.finish();
@@ -237,6 +195,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Adapter hien thi tab
+     */
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -265,6 +226,91 @@ public class MainActivity extends AppCompatActivity {
 
             // return null to display only the icon
             return null;
+        }
+    }
+
+    /**
+     * Dinh nghia cac ham tien ich cho quas trinhf dang nhap, dang ky,...
+     */
+    class AuthUtils{
+        /**
+         * Action register
+         * @param email
+         * @param password
+         */
+        void createUser(String email, String password) {
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "Register false", Toast.LENGTH_SHORT).show();
+                            } else {
+                                initNewUserInfo();
+                                Toast.makeText(MainActivity.this, "Register ok", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+
+
+        /**
+         * Action Login
+         * @param email
+         * @param password
+         */
+        void signIn(String email, String password) {
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "signInWithEmail:failed", task.getException());
+                                Toast.makeText(MainActivity.this, "Login false", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, "Login ok", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+
+        /**
+         * Action reset password
+         * @param email
+         */
+        void resetPassword(final String email){
+            mAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "Sent email to " + email, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+
+        /**
+         * Khoi tao thong tin mac dinh cho tai khoan moi
+         */
+        void initNewUserInfo(){
+            User newUser = new User();
+            newUser.email = user.getEmail();
+            newUser.name = user.getEmail().substring(0, user.getEmail().indexOf("@"));
+            newUser.avata = STR_DEFAULT_BASE64;
+            Map<String, User> map = new HashMap<>();
+            map.put(user.getUid(), newUser);
+            mFirebaseDatabaseReference.child("user").setValue(map);
         }
     }
 }
