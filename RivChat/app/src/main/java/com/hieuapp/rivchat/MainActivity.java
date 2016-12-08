@@ -35,6 +35,9 @@ import com.hieuapp.rivchat.ui.GroupFragment;
 import com.hieuapp.rivchat.ui.LoginActivity;
 import com.hieuapp.rivchat.ui.RegisterActivity;
 import com.hieuapp.rivchat.ui.UserProfileFragment;
+import com.yarolegovich.lovelydialog.LovelyCustomDialog;
+import com.yarolegovich.lovelydialog.LovelyInfoDialog;
+import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -51,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     public static String STR_EXTRA_USERNAME = "username";
     public static String STR_EXTRA_PASSWORD = "password";
     public static String STR_DEFAULT_BASE64 = "default";
+    public static String STR_FRIEND_FRAGMENT = "FRIEND";
+    public static String STR_GROUP_FRAGMENT = "GROUP";
+    public static String STR_INFO_FRAGMENT = "INFO";
 
     private AuthUtils authUtils;
     private static boolean haveActivityResult;
@@ -58,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     private DatabaseReference mFirebaseDatabaseReference;
+    private FloatingActionButton floatButton;
+    private ViewPagerAdapter adapter;
+    private LovelyProgressDialog waitingDialog;
 
     @Override
     protected void onStart() {
@@ -72,15 +81,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mAuth.signOut();
-                Snackbar.make(view, "Logout", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        floatButton = (FloatingActionButton) findViewById(R.id.fab);
         haveActivityResult = true;
         initTab();
         initFirebase();
@@ -110,11 +111,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new FriendsFragment(), "ONE");
-        adapter.addFrag(new GroupFragment(), "TWO");
-        adapter.addFrag(new UserProfileFragment(), "THREE");
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFrag(new FriendsFragment(), STR_FRIEND_FRAGMENT);
+        adapter.addFrag(new GroupFragment(), STR_GROUP_FRAGMENT);
+        adapter.addFrag(new UserProfileFragment(), STR_INFO_FRAGMENT);
+        floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(0)).onClickFloatButton);
         viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(adapter.getItem(position) instanceof FriendsFragment){
+                    floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(position)).onClickFloatButton);
+                    floatButton.setImageResource(R.drawable.plus);
+                }else if(adapter.getItem(position) instanceof GroupFragment){
+                    floatButton.setOnClickListener(((GroupFragment)adapter.getItem(position)).onClickFloatButton);
+                    floatButton.setImageResource(R.drawable.ic_float_add_group);
+                }else{
+                    floatButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mAuth.signOut();
+                            Snackbar.make(view, "Logout", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     /**
@@ -146,6 +179,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Khoi tao realtime database
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+        //Khoi tao dialog waiting khi dang nhap
+        waitingDialog = new LovelyProgressDialog(this).setCancelable(false);
     }
 
     @Override
@@ -239,20 +275,44 @@ public class MainActivity extends AppCompatActivity {
          * @param password
          */
         void createUser(String email, String password) {
+            waitingDialog.setIcon(R.drawable.ic_add_friend)
+                    .setTitle("Registering....")
+                    .setTopColorRes(R.color.colorPrimary)
+                    .show();
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
+                            waitingDialog.dismiss();
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, "Register false", Toast.LENGTH_SHORT).show();
+                                new LovelyInfoDialog(MainActivity.this){
+                                    @Override
+                                    public LovelyInfoDialog setConfirmButtonText(String text) {
+                                        findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                dismiss();
+                                                startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
+                                                haveActivityResult = false;
+                                            }
+                                        });
+                                        return super.setConfirmButtonText(text);
+                                    }
+                                }
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("Register false")
+                                        .setMessage("Email exist or weak password!")
+                                        .setConfirmButtonText("ok")
+                                        .setCancelable(false)
+                                        .show();
                             } else {
                                 initNewUserInfo();
-                                Toast.makeText(MainActivity.this, "Register ok", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Register and Login success", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -265,20 +325,44 @@ public class MainActivity extends AppCompatActivity {
          * @param password
          */
         void signIn(String email, String password) {
+            waitingDialog.setIcon(R.drawable.ic_person_low)
+                    .setTitle("Login....")
+                    .setTopColorRes(R.color.colorPrimary)
+                    .show();
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
+                            waitingDialog.dismiss();
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
                                 Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                Toast.makeText(MainActivity.this, "Login false", Toast.LENGTH_SHORT).show();
+                                new LovelyInfoDialog(MainActivity.this){
+                                    @Override
+                                    public LovelyInfoDialog setConfirmButtonText(String text) {
+                                        findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                dismiss();
+                                                startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
+                                                haveActivityResult = false;
+                                            }
+                                        });
+                                        return super.setConfirmButtonText(text);
+                                    }
+                                }
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setIcon(R.drawable.ic_person_low)
+                                        .setTitle("Login false")
+                                        .setMessage("Email not exist or wrong password!")
+                                        .setCancelable(false)
+                                        .setConfirmButtonText("Ok")
+                                        .show();
                             } else {
-                                Toast.makeText(MainActivity.this, "Login ok", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Login success", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -293,9 +377,14 @@ public class MainActivity extends AppCompatActivity {
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, "Sent email to " + email, Toast.LENGTH_SHORT).show();
-                            }
+                            new LovelyInfoDialog(MainActivity.this)
+                                    .setTopColorRes(R.color.colorPrimary)
+                                    .setIcon(R.drawable.ic_pass_reset)
+                                    //This will add Don't show again checkbox to the dialog. You can pass any ID as argument
+                                    .setNotShowAgainOptionEnabled(0)
+                                    .setTitle("Password Recovery")
+                                    .setMessage("Sent email to " + email)
+                                    .show();
                         }
                     });
         }

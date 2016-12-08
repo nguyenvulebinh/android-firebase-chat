@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
@@ -25,9 +26,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupFragment extends Fragment {
     RecyclerView recyclerListGroups;
-
+    public FragGroupClickFloatButton onClickFloatButton;
     public GroupFragment() {
         // Required empty public constructor
+        onClickFloatButton = new FragGroupClickFloatButton();
     }
 
     @Override
@@ -74,5 +76,12 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 class ItemGroupViewHolder extends RecyclerView.ViewHolder {
     ItemGroupViewHolder(View itemView) {
         super(itemView);
+    }
+}
+class FragGroupClickFloatButton implements View.OnClickListener{
+
+    @Override
+    public void onClick(View view) {
+        Toast.makeText(view.getContext(), "Add Group", Toast.LENGTH_SHORT).show();
     }
 }
