@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton floatButton;
     private ViewPagerAdapter adapter;
     private LovelyProgressDialog waitingDialog;
+    public static String UID = "";
 
     @Override
     protected void onStart() {
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    UID = user.getUid();
                     Toast.makeText(MainActivity.this, "Uid: " + user.getUid(), Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
@@ -380,8 +382,6 @@ public class MainActivity extends AppCompatActivity {
                             new LovelyInfoDialog(MainActivity.this)
                                     .setTopColorRes(R.color.colorPrimary)
                                     .setIcon(R.drawable.ic_pass_reset)
-                                    //This will add Don't show again checkbox to the dialog. You can pass any ID as argument
-                                    .setNotShowAgainOptionEnabled(0)
                                     .setTitle("Password Recovery")
                                     .setMessage("Sent email to " + email)
                                     .show();

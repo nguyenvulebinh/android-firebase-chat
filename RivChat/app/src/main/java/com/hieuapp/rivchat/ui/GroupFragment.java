@@ -29,7 +29,6 @@ public class GroupFragment extends Fragment {
     public FragGroupClickFloatButton onClickFloatButton;
     public GroupFragment() {
         // Required empty public constructor
-        onClickFloatButton = new FragGroupClickFloatButton();
     }
 
     @Override
@@ -46,6 +45,7 @@ public class GroupFragment extends Fragment {
         recyclerListGroups.setLayoutManager(layoutManager);
         ListGroupsAdapter adapter = new ListGroupsAdapter(getContext());
         recyclerListGroups.setAdapter(adapter);
+        onClickFloatButton = new FragGroupClickFloatButton();
         return layout;
     }
 
