@@ -308,9 +308,7 @@ public class MainActivity extends AppCompatActivity {
             newUser.email = user.getEmail();
             newUser.name = user.getEmail().substring(0, user.getEmail().indexOf("@"));
             newUser.avata = STR_DEFAULT_BASE64;
-            Map<String, User> map = new HashMap<>();
-            map.put(user.getUid(), newUser);
-            mFirebaseDatabaseReference.child("user").setValue(map);
+            mFirebaseDatabaseReference.child("user/"+user.getUid()).setValue(newUser);
         }
     }
 }
