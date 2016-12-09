@@ -10,14 +10,23 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.model.Configuration;
+import com.hieuapp.rivchat.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +35,10 @@ import java.util.List;
  * Created by hieuttc on 05/12/2016.
  */
 
+/**
+ * Firebase: bhrivchat@gmail.com
+ * Mk 123456a@
+ */
 public class UserProfileFragment extends Fragment {
     TextView tvUserName;
     ImageView avatar;
@@ -38,6 +51,10 @@ public class UserProfileFragment extends Fragment {
     private static final String EMAIL_LABEL = "Email";
     private static final String SIGNOUT_LABEL = "Sign out";
 
+    private DatabaseReference userDB;
+    private User myAccount;
+
+
 
     public UserProfileFragment() {
         // Required empty public constructor
@@ -46,7 +63,40 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(MainActivity.UID);
 
+        ValueEventListener userListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Lấy thông tin của user về và cập nhật lên giao diện
+                listConfig.clear();
+                myAccount = dataSnapshot.getValue(User.class);
+
+                Configuration userNameConfig = new Configuration(USERNAME_LABEL, myAccount.name, R.mipmap.ic_account_box);
+                listConfig.add(userNameConfig);
+
+                Configuration emailConfig = new Configuration(EMAIL_LABEL, myAccount.email, R.mipmap.ic_email);
+                listConfig.add(emailConfig);
+
+                Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
+                listConfig.add(signout);
+
+                if(infoAdapter != null){
+                    infoAdapter.notifyDataSetChanged();
+                }
+
+                if(tvUserName != null){
+                    tvUserName.setText(myAccount.name);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //Có lỗi xảy ra, không lấy đc dữ liệu
+                Log.e(UserProfileFragment.class.getName(), "loadPost:onCancelled", databaseError.toException());
+            }
+        };
+        userDB.addValueEventListener(userListener);
     }
 
     @Override
@@ -56,11 +106,27 @@ public class UserProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_info, container, false);
         avatar = (ImageView) view.findViewById(R.id.img_avatar);
         tvUserName = (TextView)view.findViewById(R.id.tv_username);
-        tvUserName.setText("Hieu Trung Tran");
+
+        //Nếu không lấy đc account thì khởi tạo 1 user mặc định
+        if(myAccount == null){
+            myAccount = new User();
+            myAccount.name = "User name";
+            myAccount.email = "example@email.com";
+            myAccount.avata = "default";
+        }
+        tvUserName.setText(myAccount.name);
+
+        Resources res = getResources();
+        Bitmap src;
+        //Nếu chưa có avatar thì để hình mặc định
+        if(myAccount.avata.equals("default")){
+            src = BitmapFactory.decodeResource(res, R.drawable.user_default);
+        }else {
+            byte[] decodedString = Base64.decode(myAccount.avata, Base64.DEFAULT);
+            src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        }
 
         /*Bo tròn avatar*/
-        Resources res = getResources();
-        Bitmap src = BitmapFactory.decodeResource(res, R.drawable.hieuapp);
         RoundedBitmapDrawable dr =
                 RoundedBitmapDrawableFactory.create(res, src);
         dr.setCornerRadius(Math.max(src.getWidth(), src.getHeight()) / 2.0f);
@@ -72,10 +138,17 @@ public class UserProfileFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(infoAdapter);
-
-        initDataConfig();
-
         return view;
+    }
+
+    @Override
+    public void onDestroyView (){
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy (){
+        super.onDestroy();
     }
 
     public class UserInfoAdapter extends RecyclerView.Adapter<UserInfoAdapter.ViewHolder>{
@@ -117,20 +190,6 @@ public class UserProfileFragment extends Fragment {
             }
         }
 
-    }
-
-    public void initDataConfig(){
-        //Test with hashcode username
-        Configuration userNameConfig = new Configuration(USERNAME_LABEL, "Hieu Trung Tran", R.mipmap.ic_account_box);
-        listConfig.add(userNameConfig);
-
-        Configuration emailConfig = new Configuration(EMAIL_LABEL, "trunghieu.bka57@gmail.com", R.mipmap.ic_email);
-        listConfig.add(emailConfig);
-
-        Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
-        listConfig.add(signout);
-
-        infoAdapter.notifyDataSetChanged();
     }
 
 }

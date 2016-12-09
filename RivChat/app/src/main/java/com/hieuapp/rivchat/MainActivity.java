@@ -69,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
     private LovelyProgressDialog waitingDialog;
     public static String UID = "";
 
+    //TODO only use this UID for debug mode
+//    public static String UID = "6kU0SbJPF5QJKZTfvW1BqKolrx22";
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -171,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed out, start activity login
                     if (haveActivityResult) {
                         //TODO only debug mode
-//                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
+                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
                         haveActivityResult = false;
                     }
                     Log.d(TAG, "onAuthStateChanged:signed_out");
