@@ -16,8 +16,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -167,10 +169,18 @@ public class UserProfileFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            Configuration config = profileConfig.get(position);
+            final Configuration config = profileConfig.get(position);
             holder.label.setText(config.getLabel());
             holder.value.setText(config.getValue());
             holder.icon.setImageResource(config.getIcon());
+            ((RelativeLayout)holder.label.getParent()).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(config.getLabel().equals(SIGNOUT_LABEL)){
+                        FirebaseAuth.getInstance().signOut();
+                    }
+                }
+            });
         }
 
         @Override

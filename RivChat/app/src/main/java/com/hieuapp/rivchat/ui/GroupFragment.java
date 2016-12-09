@@ -49,6 +49,19 @@ public class GroupFragment extends Fragment {
         return layout;
     }
 
+    public class FragGroupClickFloatButton implements View.OnClickListener{
+
+        Context context;
+        public FragGroupClickFloatButton getInstance(Context context){
+            this.context = context;
+            return this;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Toast.makeText(context, "Add Group", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
 class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -76,12 +89,5 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 class ItemGroupViewHolder extends RecyclerView.ViewHolder {
     ItemGroupViewHolder(View itemView) {
         super(itemView);
-    }
-}
-class FragGroupClickFloatButton implements View.OnClickListener{
-
-    @Override
-    public void onClick(View view) {
-        Toast.makeText(view.getContext(), "Add Group", Toast.LENGTH_SHORT).show();
     }
 }

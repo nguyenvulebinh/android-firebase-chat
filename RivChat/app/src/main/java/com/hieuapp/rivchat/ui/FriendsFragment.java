@@ -44,7 +44,7 @@ public class FriendsFragment extends Fragment {
     public FragFriendClickFloatButton onClickFloatButton;
 
     public FriendsFragment() {
-        // Required empty public constructor
+        onClickFloatButton = new FragFriendClickFloatButton();
     }
 
     @Override
@@ -62,7 +62,6 @@ public class FriendsFragment extends Fragment {
         recyclerListFrends.setLayoutManager(linearLayoutManager);
         adapter = new ListFriendsAdapter(getContext(), new ListFriend());
         recyclerListFrends.setAdapter(adapter);
-        onClickFloatButton = new FragFriendClickFloatButton(getContext());
         return layout;
     }
 
@@ -73,6 +72,192 @@ public class FriendsFragment extends Fragment {
      */
     private void makeFriend(String email) {
 
+    }
+
+    public class FragFriendClickFloatButton implements View.OnClickListener {
+        Context context;
+        LovelyProgressDialog dialogWait;
+
+        public FragFriendClickFloatButton() {
+        }
+
+        public FragFriendClickFloatButton getInstance(Context context){
+            this.context = context;
+            dialogWait = new LovelyProgressDialog(context);
+            return this;
+        }
+
+        @Override
+        public void onClick(final View view) {
+            new LovelyTextInputDialog(view.getContext(), R.style.EditTextTintTheme)
+                    .setTopColorRes(R.color.colorPrimary)
+                    .setTitle("Add friend")
+                    .setMessage("Enter friend email")
+                    .setIcon(R.drawable.ic_add_friend)
+                    .setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+                    .setInputFilter("Email not found", new LovelyTextInputDialog.TextFilter() {
+                        @Override
+                        public boolean check(String text) {
+                            Pattern VALID_EMAIL_ADDRESS_REGEX =
+                                    Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+                            Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(text);
+                            return matcher.find();
+                        }
+                    })
+                    .setConfirmButton(android.R.string.ok, new LovelyTextInputDialog.OnTextInputConfirmListener() {
+                        @Override
+                        public void onTextInputConfirmed(String text) {
+                            //Tim id user id
+                            findIDEmail(text);
+                            //Check xem da ton tai ban ghi friend chua
+                            //Ghi them 1 ban ghi
+                        }
+                    })
+                    .show();
+        }
+
+        /**
+         * TIm id cua email tren server
+         *
+         * @param email
+         */
+        private void findIDEmail(String email) {
+            dialogWait.setCancelable(false)
+                    .setIcon(R.drawable.ic_add_friend)
+                    .setTitle("Finding friend....")
+                    .setTopColorRes(R.color.colorPrimary)
+                    .show();
+            FirebaseDatabase.getInstance().getReference().child("user").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    dialogWait.dismiss();
+                    if (dataSnapshot.getValue() == null) {
+                        //email not found
+                        new LovelyInfoDialog(context)
+                                .setTopColorRes(R.color.colorAccent)
+                                .setIcon(R.drawable.ic_add_friend)
+                                .setTitle("Fail")
+                                .setMessage("Email not found")
+                                .show();
+                    } else {
+                        String id = ((HashMap)dataSnapshot.getValue()).keySet().iterator().next().toString();
+                        if(id.equals(MainActivity.UID)){
+                            new LovelyInfoDialog(context)
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_add_friend)
+                                    .setTitle("Fail")
+                                    .setMessage("Email not valid")
+                                    .show();
+                        }else {
+                            addFriendStep1(id);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        /**
+         * Tim cac cap ban dua vao iduser1
+         *
+         */
+        private void addFriendStep1(final String idFriend){
+            dialogWait.setCancelable(false)
+                    .setIcon(R.drawable.ic_add_friend)
+                    .setTitle("Add friend....")
+                    .setTopColorRes(R.color.colorPrimary)
+                    .show();
+
+            FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser1").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue() != null) {
+                        HashMap mapRecord = (HashMap) dataSnapshot.getValue();
+                        Iterator listKey = mapRecord.keySet().iterator();
+                        while (listKey.hasNext()){
+                            String key = listKey.next().toString();
+                            if(((HashMap)mapRecord.get(key)).get("idUser2").toString().equals(MainActivity.UID)){
+                                dialogWait.dismiss();
+                                new LovelyInfoDialog(context)
+                                        .setTopColorRes(R.color.colorPrimary)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("Success")
+                                        .setMessage("Add friend success")
+                                        .show();
+                                return;
+                            }
+                        }
+                    }
+                    addFriendStep2(idFriend);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        /**
+         * Tim cac cap ban dua vao iduser2
+         *
+         */
+        private void addFriendStep2(final String idFriend){
+            FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser2").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue() != null) {
+                        HashMap mapRecord = (HashMap) dataSnapshot.getValue();
+                        Iterator listKey = mapRecord.keySet().iterator();
+                        while (listKey.hasNext()) {
+                            String key = listKey.next().toString();
+                            if (((HashMap) mapRecord.get(key)).get("idUser1").toString().equals(MainActivity.UID)) {
+                                dialogWait.dismiss();
+                                new LovelyInfoDialog(context)
+                                        .setTopColorRes(R.color.colorPrimary)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("Success")
+                                        .setMessage("Add friend success")
+                                        .show();
+                                return;
+                            }
+                        }
+                    }
+                    addFriend(idFriend);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        /**
+         * Add friend
+         * @param idFriend
+         */
+        private void addFriend(final String idFriend){
+            Map<String, String> map= new HashMap<>();
+            map.put("idUser1", MainActivity.UID);
+            map.put("idUser2", idFriend);
+            FirebaseDatabase.getInstance().getReference().child("friend").push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    dialogWait.dismiss();
+                    new LovelyInfoDialog(context)
+                            .setTopColorRes(R.color.colorPrimary)
+                            .setIcon(R.drawable.ic_add_friend)
+                            .setTitle("Success")
+                            .setMessage("Add friend success")
+                            .show();
+                }
+            });
+        }
     }
 
 }
@@ -124,187 +309,5 @@ class ItemFriendViewHolder extends RecyclerView.ViewHolder {
         txtName = (TextView) itemView.findViewById(R.id.txtName);
         txtTime = (TextView) itemView.findViewById(R.id.txtTime);
         txtMessage = (TextView) itemView.findViewById(R.id.txtMessage);
-    }
-}
-
-class FragFriendClickFloatButton implements View.OnClickListener {
-    Context context;
-    LovelyProgressDialog dialogWait;
-
-    public FragFriendClickFloatButton(Context context) {
-        this.context = context;
-        dialogWait = new LovelyProgressDialog(context);
-    }
-
-    @Override
-    public void onClick(final View view) {
-        new LovelyTextInputDialog(view.getContext(), R.style.EditTextTintTheme)
-                .setTopColorRes(R.color.colorPrimary)
-                .setTitle("Add friend")
-                .setMessage("Enter friend email")
-                .setIcon(R.drawable.ic_add_friend)
-                .setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-                .setInputFilter("Email not found", new LovelyTextInputDialog.TextFilter() {
-                    @Override
-                    public boolean check(String text) {
-                        Pattern VALID_EMAIL_ADDRESS_REGEX =
-                                Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-                        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(text);
-                        return matcher.find();
-                    }
-                })
-                .setConfirmButton(android.R.string.ok, new LovelyTextInputDialog.OnTextInputConfirmListener() {
-                    @Override
-                    public void onTextInputConfirmed(String text) {
-                        //Tim id user id
-                        findIDEmail(text);
-                        //Check xem da ton tai ban ghi friend chua
-                        //Ghi them 1 ban ghi
-                    }
-                })
-                .show();
-    }
-
-    /**
-     * TIm id cua email tren server
-     *
-     * @param email
-     */
-    private void findIDEmail(String email) {
-        dialogWait.setCancelable(false)
-                .setIcon(R.drawable.ic_add_friend)
-                .setTitle("Finding friend....")
-                .setTopColorRes(R.color.colorPrimary)
-                .show();
-        FirebaseDatabase.getInstance().getReference().child("user").orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                dialogWait.dismiss();
-                if (dataSnapshot.getValue() == null) {
-                    //email not found
-                    new LovelyInfoDialog(context)
-                            .setTopColorRes(R.color.colorAccent)
-                            .setIcon(R.drawable.ic_add_friend)
-                            .setTitle("Fail")
-                            .setMessage("Email not found")
-                            .show();
-                } else {
-                    String id = ((HashMap)dataSnapshot.getValue()).keySet().iterator().next().toString();
-                    if(id.equals(MainActivity.UID)){
-                        new LovelyInfoDialog(context)
-                                .setTopColorRes(R.color.colorAccent)
-                                .setIcon(R.drawable.ic_add_friend)
-                                .setTitle("Fail")
-                                .setMessage("Email not valid")
-                                .show();
-                    }else {
-                        addFriendStep1(id);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    /**
-     * Tim cac cap ban dua vao iduser1
-     *
-     */
-    private void addFriendStep1(final String idFriend){
-        dialogWait.setCancelable(false)
-                .setIcon(R.drawable.ic_add_friend)
-                .setTitle("Add friend....")
-                .setTopColorRes(R.color.colorPrimary)
-                .show();
-
-        FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser1").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null) {
-                    HashMap mapRecord = (HashMap) dataSnapshot.getValue();
-                    Iterator listKey = mapRecord.keySet().iterator();
-                    while (listKey.hasNext()){
-                        String key = listKey.next().toString();
-                        if(((HashMap)mapRecord.get(key)).get("idUser2").toString().equals(MainActivity.UID)){
-                            dialogWait.dismiss();
-                            new LovelyInfoDialog(context)
-                                    .setTopColorRes(R.color.colorPrimary)
-                                    .setIcon(R.drawable.ic_add_friend)
-                                    .setTitle("Success")
-                                    .setMessage("Add friend success")
-                                    .show();
-                            return;
-                        }
-                    }
-                }
-                addFriendStep2(idFriend);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    /**
-     * Tim cac cap ban dua vao iduser2
-     *
-     */
-    private void addFriendStep2(final String idFriend){
-        FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser2").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null) {
-                    HashMap mapRecord = (HashMap) dataSnapshot.getValue();
-                    Iterator listKey = mapRecord.keySet().iterator();
-                    while (listKey.hasNext()) {
-                        String key = listKey.next().toString();
-                        if (((HashMap) mapRecord.get(key)).get("idUser1").toString().equals(MainActivity.UID)) {
-                            dialogWait.dismiss();
-                            new LovelyInfoDialog(context)
-                                    .setTopColorRes(R.color.colorPrimary)
-                                    .setIcon(R.drawable.ic_add_friend)
-                                    .setTitle("Success")
-                                    .setMessage("Add friend success")
-                                    .show();
-                            return;
-                        }
-                    }
-                }
-                addFriend(idFriend);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    /**
-     * Add friend
-     * @param idFriend
-     */
-    private void addFriend(final String idFriend){
-        Map<String, String> map= new HashMap<>();
-        map.put("idUser1", MainActivity.UID);
-        map.put("idUser2", idFriend);
-        FirebaseDatabase.getInstance().getReference().child("friend").push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                dialogWait.dismiss();
-                new LovelyInfoDialog(context)
-                        .setTopColorRes(R.color.colorPrimary)
-                        .setIcon(R.drawable.ic_add_friend)
-                        .setTitle("Success")
-                        .setMessage("Add friend success")
-                        .show();
-            }
-        });
     }
 }

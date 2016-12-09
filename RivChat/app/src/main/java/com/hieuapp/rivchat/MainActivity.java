@@ -27,8 +27,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.ui.FriendsFragment;
 import com.hieuapp.rivchat.ui.GroupFragment;
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPagerAdapter adapter;
     private LovelyProgressDialog waitingDialog;
     public static String UID = "";
+
 
     //TODO only use this UID for debug mode
 //    public static String UID = "6kU0SbJPF5QJKZTfvW1BqKolrx22";
@@ -119,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFrag(new FriendsFragment(), STR_FRIEND_FRAGMENT);
         adapter.addFrag(new GroupFragment(), STR_GROUP_FRAGMENT);
         adapter.addFrag(new UserProfileFragment(), STR_INFO_FRAGMENT);
-        floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(0)).onClickFloatButton);
+        floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(0)).onClickFloatButton.getInstance(this));
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -130,20 +135,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 if(adapter.getItem(position) instanceof FriendsFragment){
-                    floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(position)).onClickFloatButton);
+                    floatButton.setVisibility(View.VISIBLE);
+                    floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
                     floatButton.setImageResource(R.drawable.plus);
                 }else if(adapter.getItem(position) instanceof GroupFragment){
-                    floatButton.setOnClickListener(((GroupFragment)adapter.getItem(position)).onClickFloatButton);
+                    floatButton.setVisibility(View.VISIBLE);
+                    floatButton.setOnClickListener(((GroupFragment)adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
                     floatButton.setImageResource(R.drawable.ic_float_add_group);
                 }else{
-                    floatButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mAuth.signOut();
-                            Snackbar.make(view, "Logout", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
+                    floatButton.setVisibility(View.GONE);
                 }
             }
 
@@ -340,11 +340,11 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-                            waitingDialog.dismiss();
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
+                                waitingDialog.dismiss();
                                 Log.w(TAG, "signInWithEmail:failed", task.getException());
                                 new LovelyInfoDialog(MainActivity.this){
                                     @Override
@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setConfirmButtonText("Ok")
                                         .show();
                             } else {
-                                Toast.makeText(MainActivity.this, "Login success", Toast.LENGTH_SHORT).show();
+                                saveUserInfo();
                             }
                         }
                     });
@@ -391,6 +391,29 @@ public class MainActivity extends AppCompatActivity {
                                     .show();
                         }
                     });
+        }
+
+        /**
+         * Luu thong tin user info cho nguoi dung dang nhap
+         */
+        void saveUserInfo(){
+            mFirebaseDatabaseReference.child("user/"+UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    waitingDialog.dismiss();
+                    HashMap hashUser = (HashMap) dataSnapshot.getValue();
+                    User userInfo = new User();
+                    userInfo.name = (String) hashUser.get("name");
+                    userInfo.email = (String) hashUser.get("email");
+                    userInfo.avata = (String) hashUser.get("avata");
+                    SharedPreferenceHelper.getInstance(MainActivity.this).saveUserInfo(userInfo);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
 
         /**
