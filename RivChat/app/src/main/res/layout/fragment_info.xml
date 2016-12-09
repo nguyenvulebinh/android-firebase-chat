@@ -1,11 +1,12 @@
-<android.support.percent.PercentFrameLayout
+<android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <RelativeLayout
-        android:background="@color/grey_200"
+        android:id="@+id/profile"
+        android:background="@color/grey_100"
         app:layout_aspectRatio="150%"
         app:layout_widthPercent="100%">
         <LinearLayout
@@ -30,4 +31,11 @@
         </LinearLayout>
     </RelativeLayout>
 
-</android.support.percent.PercentFrameLayout>
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/profile"
+        android:id="@+id/info_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical" />
+
+</android.support.percent.PercentRelativeLayout>

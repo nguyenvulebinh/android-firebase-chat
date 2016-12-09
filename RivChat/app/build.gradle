@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'bhrivchat'
             keyPassword '123456a@'
-            storeFile file('/home/nguyenbinh/Programming/Android/AndroidStudioWorkSpace/PetProject/android-firebase-chat/bhrivchat.jks')
+            storeFile file('/home/hieuapp/AndroidStudioProjects/android-firebase-chat/bhrivchat.jks')
             storePassword '123456a@'
         }
     }
