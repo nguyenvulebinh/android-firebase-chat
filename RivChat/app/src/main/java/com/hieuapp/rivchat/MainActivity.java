@@ -52,7 +52,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     private ViewPager viewPager;
-    private TabLayout tabLayout;
+    private TabLayout tabLayout = null;
     public static int REQUEST_CODE_LOGIN = 1000;
     public static String STR_EXTRA_ACTION = "action";
     public static String STR_EXTRA_USERNAME = "username";
@@ -88,11 +88,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-
         floatButton = (FloatingActionButton) findViewById(R.id.fab);
         haveActivityResult = true;
-        initTab();
         initFirebase();
     }
 
@@ -100,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
      * Khoi tao 3 tab
      */
     private void initTab() {
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorIndivateTab));
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
@@ -168,7 +166,9 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     UID = user.getUid();
-                    Toast.makeText(MainActivity.this, "Uid: " + user.getUid(), Toast.LENGTH_SHORT).show();
+                    if(tabLayout == null){
+                        initTab();
+                    }
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out, start activity login

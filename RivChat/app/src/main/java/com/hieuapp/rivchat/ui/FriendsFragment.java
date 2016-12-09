@@ -277,19 +277,20 @@ public class FriendsFragment extends Fragment {
             FirebaseDatabase.getInstance().getReference().child("user/"+id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    User user = new User();
-                    HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
-                    user.name = (String) mapUserInfo.get("name");
-                    user.email = (String) mapUserInfo.get("email");
-                    user.avata = (String) mapUserInfo.get("avata");
-                    synchronized (dataListFriend){
-                        dataListFriend.getListFriend().add(user);
-                    }
-                    int curent = countFirendInfo.decrementAndGet();
-                    if(curent == 0){
-                        adapter.notifyDataSetChanged();
-                        dialogFindAllFriend.dismiss();
+                    if(dataSnapshot.getValue() != null) {
+                        User user = new User();
+                        HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
+                        user.name = (String) mapUserInfo.get("name");
+                        user.email = (String) mapUserInfo.get("email");
+                        user.avata = (String) mapUserInfo.get("avata");
+                        synchronized (dataListFriend) {
+                            dataListFriend.getListFriend().add(user);
+                        }
+                        int curent = countFirendInfo.decrementAndGet();
+                        if (curent == 0) {
+                            adapter.notifyDataSetChanged();
+                            dialogFindAllFriend.dismiss();
+                        }
                     }
                 }
 
