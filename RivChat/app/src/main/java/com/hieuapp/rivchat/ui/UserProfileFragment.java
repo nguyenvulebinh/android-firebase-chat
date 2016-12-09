@@ -1,5 +1,8 @@
 package com.hieuapp.rivchat.ui;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,7 +31,10 @@ import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.model.Configuration;
 import com.hieuapp.rivchat.model.User;
+import com.hieuapp.rivchat.util.ImageUtils;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +58,12 @@ public class UserProfileFragment extends Fragment {
     private static final String EMAIL_LABEL = "Email";
     private static final String SIGNOUT_LABEL = "Sign out";
 
+    private static final int PICK_IMAGE = 1994;
+
     private DatabaseReference userDB;
     private User myAccount;
+
+    private Context context;
 
 
 
@@ -88,6 +99,8 @@ public class UserProfileFragment extends Fragment {
                 if(tvUserName != null){
                     tvUserName.setText(myAccount.name);
                 }
+
+                setImageAvatar(context, myAccount.avata);
             }
 
             @Override
@@ -104,33 +117,19 @@ public class UserProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info, container, false);
+        context = view.getContext();
         avatar = (ImageView) view.findViewById(R.id.img_avatar);
+        avatar.setOnClickListener(onAvatarClick);
         tvUserName = (TextView)view.findViewById(R.id.tv_username);
 
-        //Nếu không lấy đc account thì khởi tạo 1 user mặc định
+        initEmptyUser();
+
         if(myAccount == null){
             myAccount = new User();
-            myAccount.name = "User name";
-            myAccount.email = "example@email.com";
             myAccount.avata = "default";
         }
-        tvUserName.setText(myAccount.name);
 
-        Resources res = getResources();
-        Bitmap src;
-        //Nếu chưa có avatar thì để hình mặc định
-        if(myAccount.avata.equals("default")){
-            src = BitmapFactory.decodeResource(res, R.drawable.user_default);
-        }else {
-            byte[] decodedString = Base64.decode(myAccount.avata, Base64.DEFAULT);
-            src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        }
-
-        /*Bo tròn avatar*/
-        RoundedBitmapDrawable dr =
-                RoundedBitmapDrawableFactory.create(res, src);
-        dr.setCornerRadius(Math.max(src.getWidth(), src.getHeight()) / 2.0f);
-        avatar.setImageDrawable(dr);
+        setImageAvatar(context, myAccount.avata);
 
         recyclerView = (RecyclerView)view.findViewById(R.id.info_recycler_view);
         infoAdapter = new UserInfoAdapter(listConfig);
@@ -138,7 +137,68 @@ public class UserProfileFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(infoAdapter);
+
+        initEmptyUser();
+
         return view;
+    }
+
+    private View.OnClickListener onAvatarClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+        }
+    };
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                Toast.makeText(context, "Có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_LONG).show();
+                return;
+            }
+            try {
+                InputStream inputStream = context.getContentResolver().openInputStream(data.getData());
+                Bitmap imgBitmap = BitmapFactory.decodeStream(inputStream);
+                imgBitmap = ImageUtils.cropToSquare(imgBitmap);
+                String imageBase64 = ImageUtils.encodeBase64(imgBitmap);
+                userDB.child("avata").setValue(imageBase64);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void initEmptyUser(){
+        listConfig.clear();
+
+        Configuration userNameConfig = new Configuration(USERNAME_LABEL, "", R.mipmap.ic_account_box);
+        listConfig.add(userNameConfig);
+
+        Configuration emailConfig = new Configuration(EMAIL_LABEL, "", R.mipmap.ic_email);
+        listConfig.add(emailConfig);
+
+        Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
+        listConfig.add(signout);
+    }
+
+    private void setImageAvatar(Context context, String imgBase64){
+        Resources res = getResources();
+        //Nếu chưa có avatar thì để hình mặc định
+        Bitmap src;
+        if(imgBase64.equals("default")){
+            src = BitmapFactory.decodeResource(res, R.drawable.user_default);
+        }else {
+            byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
+            src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        }
+
+        avatar.setImageDrawable(ImageUtils.roundedImage(context, src));
     }
 
     @Override
