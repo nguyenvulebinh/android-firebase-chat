@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.LoginActivity"
-            android:theme="@style/Translucent"
+            android:theme="@style/TranslucentBackground"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             />
