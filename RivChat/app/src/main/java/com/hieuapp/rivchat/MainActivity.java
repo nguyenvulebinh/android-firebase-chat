@@ -168,7 +168,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     // User is signed out, start activity login
                     if (haveActivityResult) {
-                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
+                        //TODO only debug mode
+//                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
                         haveActivityResult = false;
                     }
                     Log.d(TAG, "onAuthStateChanged:signed_out");
