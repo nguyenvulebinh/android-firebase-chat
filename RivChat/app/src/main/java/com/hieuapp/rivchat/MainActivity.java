@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        haveActivityResult = true;
         if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
             if (data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_LOGIN)) {
                 authUtils.signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
@@ -317,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setCancelable(false)
                                         .show();
                             } else {
+                                haveActivityResult = true;
                                 initNewUserInfo();
                                 Toast.makeText(MainActivity.this, "Register and Login success", Toast.LENGTH_SHORT).show();
                             }
@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setConfirmButtonText("Ok")
                                         .show();
                             } else {
+                                haveActivityResult = true;
                                 saveUserInfo();
                             }
                         }
@@ -383,11 +384,25 @@ public class MainActivity extends AppCompatActivity {
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            new LovelyInfoDialog(MainActivity.this)
+                            new LovelyInfoDialog(MainActivity.this){
+                                @Override
+                                public LovelyInfoDialog setConfirmButtonText(String text) {
+                                    findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            dismiss();
+                                            startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
+                                            haveActivityResult = false;
+                                        }
+                                    });
+                                    return super.setConfirmButtonText(text);
+                                }
+                            }
                                     .setTopColorRes(R.color.colorPrimary)
                                     .setIcon(R.drawable.ic_pass_reset)
                                     .setTitle("Password Recovery")
                                     .setMessage("Sent email to " + email)
+                                    .setConfirmButtonText("Ok")
                                     .show();
                         }
                     });

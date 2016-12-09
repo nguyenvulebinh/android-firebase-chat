@@ -19,16 +19,16 @@ public class ListFriend {
     public ListFriend(){
         //Test init 10 item
         listFriend = new ArrayList<>();
-        Random random = new Random(System.currentTimeMillis());
-        for(int i = 0; i <10; i++){
-            User temp = new User();
-            temp.name ="Nguyen Binh";
-            temp.message.text = "Chao ngay moi";
-            temp.message.timestamp = 12;
-            temp.status.isOnline = (random.nextInt() % 2 == 0);
-            temp.avata = MainActivity.STR_DEFAULT_BASE64;
-            listFriend.add(temp);
-        }
+//        Random random = new Random(System.currentTimeMillis());
+//        for(int i = 0; i <10; i++){
+//            User temp = new User();
+//            temp.name ="Nguyen Binh";
+//            temp.message.text = "Chao ngay moi";
+//            temp.message.timestamp = 12;
+//            temp.status.isOnline = (random.nextInt() % 2 == 0);
+//            temp.avata = MainActivity.STR_DEFAULT_BASE64;
+//            listFriend.add(temp);
+//        }
     }
 
     public void setListFriend(ArrayList<User> listFriend) {
