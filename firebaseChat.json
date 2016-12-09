@@ -11,10 +11,14 @@ message =  {
 };
 
 friend = {
-	"9sjsfksakfjsf":{
-		"idUser1": 929382394824,
-		"idUser2": 93392903492493 
-	}
+	"idUser1":{
+		"0": "idUser2",
+		"1": "idUser3"
+	},
+	"idUser2":{
+		"0": "idUser3",
+		"1": "idUser4"
+	},
 }
 
 room = {
