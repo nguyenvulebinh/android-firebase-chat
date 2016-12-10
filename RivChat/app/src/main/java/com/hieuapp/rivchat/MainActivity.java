@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     private ViewPager viewPager;
     private TabLayout tabLayout = null;
-    public static int REQUEST_CODE_LOGIN = 1000;
     public static String STR_FRIEND_FRAGMENT = "FRIEND";
     public static String STR_GROUP_FRAGMENT = "GROUP";
     public static String STR_INFO_FRAGMENT = "INFO";
