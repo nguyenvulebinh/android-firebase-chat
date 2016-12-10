@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFrag(new UserProfileFragment(), STR_INFO_FRAGMENT);
         floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(0)).onClickFloatButton.getInstance(this));
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.ListFriend;
@@ -53,13 +54,12 @@ public class FriendsFragment extends Fragment {
     private RecyclerView recyclerListFrends;
     private ListFriendsAdapter adapter;
     public FragFriendClickFloatButton onClickFloatButton;
-    private final ListFriend dataListFriend;
+    private ListFriend dataListFriend = null;
     private ArrayList<String> listFriendID = null;
     LovelyProgressDialog dialogFindAllFriend;
 
     public FriendsFragment() {
         onClickFloatButton = new FragFriendClickFloatButton();
-        dataListFriend = new ListFriend();
     }
 
     @Override
@@ -71,6 +71,15 @@ public class FriendsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        if(dataListFriend == null){
+            dataListFriend = FriendDB.getInstance(getContext()).getListFriend();
+            if(dataListFriend.getListFriend().size() > 0){
+                listFriendID = new ArrayList<>();
+                for(Friend friend: dataListFriend.getListFriend()){
+                    listFriendID.add(friend.id);
+                }
+            }
+        }
         View layout = inflater.inflate(R.layout.fragment_people, container, false);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListFrends = (RecyclerView) layout.findViewById(R.id.recycleListFriend);
@@ -201,6 +210,7 @@ public class FriendsFragment extends Fragment {
                 addFriend(idFriend);
                 listFriendID.add(idFriend);
                 dataListFriend.getListFriend().add(userInfo);
+                FriendDB.getInstance(getContext()).addFriend(userInfo);
                 adapter.notifyDataSetChanged();
             }
         }
@@ -296,6 +306,8 @@ public class FriendsFragment extends Fragment {
                         }
                         int curent = countFirendInfo.decrementAndGet();
                         if (curent == 0) {
+                            //save list friend
+                            FriendDB.getInstance(getContext()).addListFriend(dataListFriend);
                             adapter.notifyDataSetChanged();
                             dialogFindAllFriend.dismiss();
                         }
