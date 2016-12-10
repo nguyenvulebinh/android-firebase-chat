@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Configuration;
 import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.util.ImageUtils;
@@ -75,7 +76,7 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(MainActivity.UID);
+        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
         userDB.addValueEventListener(userListener);
     }
 
@@ -176,7 +177,7 @@ public class UserProfileFragment extends Fragment {
                 InputStream is = ImageUtils.convertBitmapToInputStream(imgBitmap);
                 Bitmap liteImage = ImageUtils.makeImageLite(is,
                         imgBitmap.getWidth(), imgBitmap.getHeight(),
-                        ImageUtils.AVATAR_WIDTH, ImageUtils.AVATAR_HEIGHt);
+                        ImageUtils.AVATAR_WIDTH, ImageUtils.AVATAR_HEIGHT);
 
                 String imageBase64 = ImageUtils.encodeBase64(liteImage);
                 userDB.child("avata").setValue(imageBase64);

@@ -11,6 +11,7 @@ public class User {
     public Status status;
     public Message message;
 
+
     public User(){
         status = new Status();
         message = new Message();

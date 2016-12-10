@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.StaticConfig;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,9 +142,9 @@ public class RegisterActivity extends AppCompatActivity {
         String repeatPassword = editTextRepeatPassword.getText().toString();
         if(validate(username, password, repeatPassword)){
             Intent data = new Intent();
-            data.putExtra(MainActivity.STR_EXTRA_USERNAME, username);
-            data.putExtra(MainActivity.STR_EXTRA_PASSWORD, password);
-            data.putExtra(MainActivity.STR_EXTRA_ACTION, STR_EXTRA_ACTION_REGISTER);
+            data.putExtra(StaticConfig.STR_EXTRA_USERNAME, username);
+            data.putExtra(StaticConfig.STR_EXTRA_PASSWORD, password);
+            data.putExtra(StaticConfig.STR_EXTRA_ACTION, STR_EXTRA_ACTION_REGISTER);
             setResult(RESULT_OK, data);
             finish();
         }else {

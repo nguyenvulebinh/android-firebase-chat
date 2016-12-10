@@ -1,16 +1,23 @@
 package com.hieuapp.rivchat.ui;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -20,14 +27,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.StaticConfig;
+import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.ListFriend;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,9 +53,13 @@ public class FriendsFragment extends Fragment {
     private RecyclerView recyclerListFrends;
     private ListFriendsAdapter adapter;
     public FragFriendClickFloatButton onClickFloatButton;
+    private final ListFriend dataListFriend;
+    private ArrayList<String> listFriendID = null;
+    LovelyProgressDialog dialogFindAllFriend;
 
     public FriendsFragment() {
         onClickFloatButton = new FragFriendClickFloatButton();
+        dataListFriend = new ListFriend();
     }
 
     @Override
@@ -60,18 +75,14 @@ public class FriendsFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListFrends = (RecyclerView) layout.findViewById(R.id.recycleListFriend);
         recyclerListFrends.setLayoutManager(linearLayoutManager);
-        adapter = new ListFriendsAdapter(getContext(), new ListFriend());
+        adapter = new ListFriendsAdapter(getContext(), dataListFriend);
         recyclerListFrends.setAdapter(adapter);
+        dialogFindAllFriend = new LovelyProgressDialog(getContext());
+        if(listFriendID == null){
+            listFriendID = new ArrayList<>();
+            getListFriendUId();
+        }
         return layout;
-    }
-
-    /**
-     * Thuc hien ket ban
-     *
-     * @param email
-     */
-    private void makeFriend(String email) {
-
     }
 
     public class FragFriendClickFloatButton implements View.OnClickListener {
@@ -141,7 +152,7 @@ public class FriendsFragment extends Fragment {
                                 .show();
                     } else {
                         String id = ((HashMap)dataSnapshot.getValue()).keySet().iterator().next().toString();
-                        if(id.equals(MainActivity.UID)){
+                        if(id.equals(StaticConfig.UID)){
                             new LovelyInfoDialog(context)
                                     .setTopColorRes(R.color.colorAccent)
                                     .setIcon(R.drawable.ic_add_friend)
@@ -149,7 +160,13 @@ public class FriendsFragment extends Fragment {
                                     .setMessage("Email not valid")
                                     .show();
                         }else {
-                            addFriendStep1(id);
+                            HashMap userMap = (HashMap) ((HashMap)dataSnapshot.getValue()).get(id);
+                            Friend user = new Friend();
+                            user.name = (String) userMap.get("name");
+                            user.email = (String) userMap.get("email");
+                            user.avata = (String) userMap.get("avata");
+                            user.id = id;
+                            checkBeforAddFriend(id, user);
                         }
                     }
                 }
@@ -162,79 +179,30 @@ public class FriendsFragment extends Fragment {
         }
 
         /**
-         * Tim cac cap ban dua vao iduser1
+         * Lay danh sach friend cua một UID
          *
          */
-        private void addFriendStep1(final String idFriend){
+        private void checkBeforAddFriend(final String idFriend, Friend userInfo){
             dialogWait.setCancelable(false)
                     .setIcon(R.drawable.ic_add_friend)
                     .setTitle("Add friend....")
                     .setTopColorRes(R.color.colorPrimary)
                     .show();
 
-            FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser1").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null) {
-                        HashMap mapRecord = (HashMap) dataSnapshot.getValue();
-                        Iterator listKey = mapRecord.keySet().iterator();
-                        while (listKey.hasNext()){
-                            String key = listKey.next().toString();
-                            if(((HashMap)mapRecord.get(key)).get("idUser2").toString().equals(MainActivity.UID)){
-                                dialogWait.dismiss();
-                                new LovelyInfoDialog(context)
-                                        .setTopColorRes(R.color.colorPrimary)
-                                        .setIcon(R.drawable.ic_add_friend)
-                                        .setTitle("Success")
-                                        .setMessage("Add friend success")
-                                        .show();
-                                return;
-                            }
-                        }
-                    }
-                    addFriendStep2(idFriend);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-        /**
-         * Tim cac cap ban dua vao iduser2
-         *
-         */
-        private void addFriendStep2(final String idFriend){
-            FirebaseDatabase.getInstance().getReference().child("friend").orderByChild("idUser2").equalTo(idFriend).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null) {
-                        HashMap mapRecord = (HashMap) dataSnapshot.getValue();
-                        Iterator listKey = mapRecord.keySet().iterator();
-                        while (listKey.hasNext()) {
-                            String key = listKey.next().toString();
-                            if (((HashMap) mapRecord.get(key)).get("idUser1").toString().equals(MainActivity.UID)) {
-                                dialogWait.dismiss();
-                                new LovelyInfoDialog(context)
-                                        .setTopColorRes(R.color.colorPrimary)
-                                        .setIcon(R.drawable.ic_add_friend)
-                                        .setTitle("Success")
-                                        .setMessage("Add friend success")
-                                        .show();
-                                return;
-                            }
-                        }
-                    }
-                    addFriend(idFriend);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            //Check xem da ton tai id trong danh sach id chua
+            if(listFriendID.contains(idFriend)){
+                new LovelyInfoDialog(context)
+                        .setTopColorRes(R.color.colorPrimary)
+                        .setIcon(R.drawable.ic_add_friend)
+                        .setTitle("Success")
+                        .setMessage("Add friend success")
+                        .show();
+            }else{
+                addFriend(idFriend);
+                listFriendID.add(idFriend);
+                dataListFriend.getListFriend().add(userInfo);
+                adapter.notifyDataSetChanged();
+            }
         }
 
         /**
@@ -242,24 +210,105 @@ public class FriendsFragment extends Fragment {
          * @param idFriend
          */
         private void addFriend(final String idFriend){
-            Map<String, String> map= new HashMap<>();
-            map.put("idUser1", MainActivity.UID);
-            map.put("idUser2", idFriend);
-            FirebaseDatabase.getInstance().getReference().child("friend").push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+            final AtomicInteger countFirendInfo = new AtomicInteger(2);
+            FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    dialogWait.dismiss();
-                    new LovelyInfoDialog(context)
-                            .setTopColorRes(R.color.colorPrimary)
-                            .setIcon(R.drawable.ic_add_friend)
-                            .setTitle("Success")
-                            .setMessage("Add friend success")
-                            .show();
+                    if(countFirendInfo.decrementAndGet() == 0) {
+                        dialogWait.dismiss();
+                        new LovelyInfoDialog(context)
+                                .setTopColorRes(R.color.colorPrimary)
+                                .setIcon(R.drawable.ic_add_friend)
+                                .setTitle("Success")
+                                .setMessage("Add friend success")
+                                .show();
+                    }
+                }
+            });
+
+            FirebaseDatabase.getInstance().getReference().child("friend/"+idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(countFirendInfo.decrementAndGet() == 0) {
+                        dialogWait.dismiss();
+                        new LovelyInfoDialog(context)
+                                .setTopColorRes(R.color.colorPrimary)
+                                .setIcon(R.drawable.ic_add_friend)
+                                .setTitle("Success")
+                                .setMessage("Add friend success")
+                                .show();
+                    }
                 }
             });
         }
     }
 
+    /**
+     * Lay danh sach ban be tren server
+     */
+    private void getListFriendUId(){
+        dialogFindAllFriend.setCancelable(false)
+                .setIcon(R.drawable.ic_add_friend)
+                .setTitle("Get all friend....")
+                .setTopColorRes(R.color.colorPrimary)
+                .show();
+
+        FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null) {
+                    HashMap mapRecord = (HashMap) dataSnapshot.getValue();
+                    Iterator listKey = mapRecord.keySet().iterator();
+                    while (listKey.hasNext()) {
+                        String key = listKey.next().toString();
+                        listFriendID.add(mapRecord.get(key).toString());
+                    }
+                    getAllFriendInfo();
+                }else{
+                    dialogFindAllFriend.dismiss();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    /**
+     * Truy cap bang user lay thong tin id nguoi dung
+     */
+    private void getAllFriendInfo(){
+        final AtomicInteger countFirendInfo = new AtomicInteger(listFriendID.size());
+        for(final String id: listFriendID){
+            FirebaseDatabase.getInstance().getReference().child("user/"+id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue() != null) {
+                        Friend user = new Friend();
+                        HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
+                        user.name = (String) mapUserInfo.get("name");
+                        user.email = (String) mapUserInfo.get("email");
+                        user.avata = (String) mapUserInfo.get("avata");
+                        user.id = id;
+                        synchronized (dataListFriend) {
+                            dataListFriend.getListFriend().add(user);
+                        }
+                        int curent = countFirendInfo.decrementAndGet();
+                        if (curent == 0) {
+                            adapter.notifyDataSetChanged();
+                            dialogFindAllFriend.dismiss();
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
 }
 
 class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -280,17 +329,43 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((ItemFriendViewHolder) holder).txtName.setText(listFriend.getListFriend().get(position).name);
-        ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
-        ((ItemFriendViewHolder) holder).txtTime.setText(listFriend.getListFriend().get(position).message.timestamp + ":00");
-        if (listFriend.getListFriend().get(position).avata.equals(MainActivity.STR_DEFAULT_BASE64)) {
+        final String name = listFriend.getListFriend().get(position).name;
+        final String id = listFriend.getListFriend().get(position).id;
+        ((ItemFriendViewHolder) holder).txtName.setText(name);
+        ((View)((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ChatActivity.class);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ID, id);
+                context.startActivity(intent);
+            }
+        });
+
+
+        if(listFriend.getListFriend().get(position).message.text.length() > 0) {
+            ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
+            ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
+            ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
+            ((ItemFriendViewHolder) holder).txtTime.setText(listFriend.getListFriend().get(position).message.timestamp + ":00");
+        }else{
+            ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
+            ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
+        }
+        if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.default_avata);
+        }else{
+            byte[] decodedString = Base64.decode(listFriend.getListFriend().get(position).avata, Base64.DEFAULT);
+            Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            ((ItemFriendViewHolder) holder).avata.setImageBitmap(src);
         }
-        if (listFriend.getListFriend().get(position).status.isOnline) {
-            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
-        } else {
-            ((ItemFriendViewHolder) holder).avata.setBorderWidth(0);
-        }
+
+
+//        if (listFriend.getListFriend().get(position).status.isOnline) {
+//            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
+//        } else {
+//            ((ItemFriendViewHolder) holder).avata.setBorderWidth(0);
+//        }
     }
 
     @Override
@@ -311,3 +386,4 @@ class ItemFriendViewHolder extends RecyclerView.ViewHolder {
         txtMessage = (TextView) itemView.findViewById(R.id.txtMessage);
     }
 }
+

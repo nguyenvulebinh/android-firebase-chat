@@ -52,30 +52,47 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     private ViewPager viewPager;
-    private TabLayout tabLayout;
-    public static int REQUEST_CODE_LOGIN = 1000;
-    public static String STR_EXTRA_ACTION = "action";
-    public static String STR_EXTRA_USERNAME = "username";
-    public static String STR_EXTRA_PASSWORD = "password";
-    public static String STR_DEFAULT_BASE64 = "default";
+    private TabLayout tabLayout = null;
     public static String STR_FRIEND_FRAGMENT = "FRIEND";
     public static String STR_GROUP_FRAGMENT = "GROUP";
     public static String STR_INFO_FRAGMENT = "INFO";
 
-    private AuthUtils authUtils;
-    private static boolean haveActivityResult;
+    private FloatingActionButton floatButton;
+    private ViewPagerAdapter adapter;
+
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-    private DatabaseReference mFirebaseDatabaseReference;
-    private FloatingActionButton floatButton;
-    private ViewPagerAdapter adapter;
-    private LovelyProgressDialog waitingDialog;
-//    public static String UID = "";
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        floatButton = (FloatingActionButton) findViewById(R.id.fab);
+        initTab();
+        initFirebase();
+    }
 
-    //TODO only use this UID for debug mode
-    public static String UID = "6kU0SbJPF5QJKZTfvW1BqKolrx22";
+    private void initFirebase() {
+        //Khoi tao thanh phan de dang nhap, dang ky
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                } else {
+                    MainActivity.this.finish();
+                    // User is signed in
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+    }
+
 
     @Override
     protected void onStart() {
@@ -84,22 +101,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-
-        floatButton = (FloatingActionButton) findViewById(R.id.fab);
-        haveActivityResult = true;
-        initTab();
-        initFirebase();
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 
     /**
      * Khoi tao 3 tab
      */
     private void initTab() {
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorIndivateTab));
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
@@ -154,60 +167,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Khởi tạo các thành phần cần thiết cho việc quản lý đăng nhập
-     */
-    private void initFirebase() {
-        //Khoi tao thanh phan de dang nhap, dang ky
-        mAuth = FirebaseAuth.getInstance();
-        authUtils = new AuthUtils();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    UID = user.getUid();
-                    Toast.makeText(MainActivity.this, "Uid: " + user.getUid(), Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out, start activity login
-                    if (haveActivityResult) {
-
-                        //TODO only debug mode
-//                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
-                        haveActivityResult = false;
-                    }
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
-
-        //Khoi tao realtime database
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
-        //Khoi tao dialog waiting khi dang nhap
-        waitingDialog = new LovelyProgressDialog(this).setCancelable(false);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        haveActivityResult = true;
-        if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
-            if (data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_LOGIN)) {
-                authUtils.signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
-            } else if (data.getStringExtra(STR_EXTRA_ACTION).equals(RegisterActivity.STR_EXTRA_ACTION_REGISTER)) {
-                authUtils.createUser(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
-            }else if(data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_RESET)){
-                authUtils.resetPassword(data.getStringExtra(STR_EXTRA_USERNAME));
-            }
-        } else if (resultCode == RESULT_CANCELED) {
-            this.finish();
-        }
-    }
-
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
+//            if (data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_LOGIN)) {
+//                authUtils.signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+//            } else if (data.getStringExtra(STR_EXTRA_ACTION).equals(RegisterActivity.STR_EXTRA_ACTION_REGISTER)) {
+//                authUtils.createUser(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+//            }else if(data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_RESET)){
+//                authUtils.resetPassword(data.getStringExtra(STR_EXTRA_USERNAME));
+//            }
+//        } else if (resultCode == RESULT_CANCELED) {
+//            this.finish();
+//        }
+//    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -228,14 +202,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     /**
@@ -269,163 +235,6 @@ public class MainActivity extends AppCompatActivity {
 
             // return null to display only the icon
             return null;
-        }
-    }
-
-    /**
-     * Dinh nghia cac ham tien ich cho quas trinhf dang nhap, dang ky,...
-     */
-    class AuthUtils{
-        /**
-         * Action register
-         * @param email
-         * @param password
-         */
-        void createUser(String email, String password) {
-            waitingDialog.setIcon(R.drawable.ic_add_friend)
-                    .setTitle("Registering....")
-                    .setTopColorRes(R.color.colorPrimary)
-                    .show();
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-                            waitingDialog.dismiss();
-                            // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
-                            if (!task.isSuccessful()) {
-                                new LovelyInfoDialog(MainActivity.this){
-                                    @Override
-                                    public LovelyInfoDialog setConfirmButtonText(String text) {
-                                        findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                dismiss();
-                                                startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
-                                                haveActivityResult = false;
-                                            }
-                                        });
-                                        return super.setConfirmButtonText(text);
-                                    }
-                                }
-                                        .setTopColorRes(R.color.colorAccent)
-                                        .setIcon(R.drawable.ic_add_friend)
-                                        .setTitle("Register false")
-                                        .setMessage("Email exist or weak password!")
-                                        .setConfirmButtonText("ok")
-                                        .setCancelable(false)
-                                        .show();
-                            } else {
-                                initNewUserInfo();
-                                Toast.makeText(MainActivity.this, "Register and Login success", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-        }
-
-
-        /**
-         * Action Login
-         * @param email
-         * @param password
-         */
-        void signIn(String email, String password) {
-            waitingDialog.setIcon(R.drawable.ic_person_low)
-                    .setTitle("Login....")
-                    .setTopColorRes(R.color.colorPrimary)
-                    .show();
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-                            // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
-                            if (!task.isSuccessful()) {
-                                waitingDialog.dismiss();
-                                Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                new LovelyInfoDialog(MainActivity.this){
-                                    @Override
-                                    public LovelyInfoDialog setConfirmButtonText(String text) {
-                                        findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                dismiss();
-                                                startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), REQUEST_CODE_LOGIN);
-                                                haveActivityResult = false;
-                                            }
-                                        });
-                                        return super.setConfirmButtonText(text);
-                                    }
-                                }
-                                        .setTopColorRes(R.color.colorAccent)
-                                        .setIcon(R.drawable.ic_person_low)
-                                        .setTitle("Login false")
-                                        .setMessage("Email not exist or wrong password!")
-                                        .setCancelable(false)
-                                        .setConfirmButtonText("Ok")
-                                        .show();
-                            } else {
-                                saveUserInfo();
-                            }
-                        }
-                    });
-        }
-
-        /**
-         * Action reset password
-         * @param email
-         */
-        void resetPassword(final String email){
-            mAuth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            new LovelyInfoDialog(MainActivity.this)
-                                    .setTopColorRes(R.color.colorPrimary)
-                                    .setIcon(R.drawable.ic_pass_reset)
-                                    .setTitle("Password Recovery")
-                                    .setMessage("Sent email to " + email)
-                                    .show();
-                        }
-                    });
-        }
-
-        /**
-         * Luu thong tin user info cho nguoi dung dang nhap
-         */
-        void saveUserInfo(){
-            mFirebaseDatabaseReference.child("user/"+UID).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    waitingDialog.dismiss();
-                    HashMap hashUser = (HashMap) dataSnapshot.getValue();
-                    User userInfo = new User();
-                    userInfo.name = (String) hashUser.get("name");
-                    userInfo.email = (String) hashUser.get("email");
-                    userInfo.avata = (String) hashUser.get("avata");
-                    SharedPreferenceHelper.getInstance(MainActivity.this).saveUserInfo(userInfo);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-        /**
-         * Khoi tao thong tin mac dinh cho tai khoan moi
-         */
-        void initNewUserInfo(){
-            User newUser = new User();
-            newUser.email = user.getEmail();
-            newUser.name = user.getEmail().substring(0, user.getEmail().indexOf("@"));
-            newUser.avata = STR_DEFAULT_BASE64;
-            mFirebaseDatabaseReference.child("user/"+user.getUid()).setValue(newUser);
         }
     }
 }
