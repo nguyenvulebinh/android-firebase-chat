@@ -64,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
 
-    //TODO only use this UID for debug mode
-//    public static String UID = "6kU0SbJPF5QJKZTfvW1BqKolrx22";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
 //            this.finish();
 //        }
 //    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -10,4 +10,6 @@
     <string name="repeat_password">Repeat Password</string>
     <string name="next">NEXT</string>
     <string name="register">REGISTER</string>
+
+    <string name="hint_username">Enter a new username</string>
 </resources>
