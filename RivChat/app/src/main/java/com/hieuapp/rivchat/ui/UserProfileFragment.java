@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Configuration;
 import com.hieuapp.rivchat.model.User;
 
@@ -65,7 +66,7 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(MainActivity.UID);
+        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
 
         ValueEventListener userListener = new ValueEventListener() {
             @Override

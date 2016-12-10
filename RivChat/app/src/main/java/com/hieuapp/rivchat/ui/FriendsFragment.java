@@ -1,12 +1,15 @@
 package com.hieuapp.rivchat.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.ListFriend;
 import com.hieuapp.rivchat.model.User;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
@@ -146,7 +150,7 @@ public class FriendsFragment extends Fragment {
                                 .show();
                     } else {
                         String id = ((HashMap)dataSnapshot.getValue()).keySet().iterator().next().toString();
-                        if(id.equals(MainActivity.UID)){
+                        if(id.equals(StaticConfig.UID)){
                             new LovelyInfoDialog(context)
                                     .setTopColorRes(R.color.colorAccent)
                                     .setIcon(R.drawable.ic_add_friend)
@@ -204,7 +208,7 @@ public class FriendsFragment extends Fragment {
          */
         private void addFriend(final String idFriend){
             final AtomicInteger countFirendInfo = new AtomicInteger(2);
-            FirebaseDatabase.getInstance().getReference().child("friend/"+MainActivity.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
+            FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(countFirendInfo.decrementAndGet() == 0) {
@@ -219,7 +223,7 @@ public class FriendsFragment extends Fragment {
                 }
             });
 
-            FirebaseDatabase.getInstance().getReference().child("friend/"+idFriend).push().setValue(MainActivity.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+            FirebaseDatabase.getInstance().getReference().child("friend/"+idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(countFirendInfo.decrementAndGet() == 0) {
@@ -246,7 +250,7 @@ public class FriendsFragment extends Fragment {
                 .setTopColorRes(R.color.colorPrimary)
                 .show();
 
-        FirebaseDatabase.getInstance().getReference().child("friend/"+MainActivity.UID).addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -331,10 +335,12 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
         }
-        if (listFriend.getListFriend().get(position).avata.equals(MainActivity.STR_DEFAULT_BASE64)) {
+        if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.default_avata);
         }else{
-            ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.user_default);
+            byte[] decodedString = Base64.decode(listFriend.getListFriend().get(position).avata, Base64.DEFAULT);
+            Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            ((ItemFriendViewHolder) holder).avata.setImageBitmap(src);
         }
 //        if (listFriend.getListFriend().get(position).status.isOnline) {
 //            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
