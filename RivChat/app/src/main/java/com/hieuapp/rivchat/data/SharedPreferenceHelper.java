@@ -32,8 +32,7 @@ public class SharedPreferenceHelper {
     public void saveUserInfo(User user) {
         editor.putString(SHARE_KEY_NAME, user.name);
         editor.putString(SHARE_KEY_EMAIL, user.email);
-        //avatar lưu trong SharedPreference luôn là default, khi có mạng mới đồng bộ từ server về
-        editor.putString(SHARE_KEY_AVATA, "default");
+        editor.putString(SHARE_KEY_AVATA, user.avata);
 
         editor.apply();
     }
@@ -41,13 +40,12 @@ public class SharedPreferenceHelper {
     public User getUserInfo(){
         String userName = preferences.getString(SHARE_KEY_NAME, "");
         String email = preferences.getString(SHARE_KEY_EMAIL, "");
-//        String avatar = preferences.getString(SHARE_KEY_AVATA, "default");
+        String avatar = preferences.getString(SHARE_KEY_AVATA, "default");
 
         User user = new User();
         user.name = userName;
         user.email = email;
-        //avatar lưu trong SharedPreference luôn là default, khi có mạng mới đồng bộ từ server về
-        user.avata = "default";
+        user.avata = avatar;
 
         return user;
     }
