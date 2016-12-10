@@ -256,6 +256,7 @@ public class UserProfileFragment extends Fragment {
                     if(config.getLabel().equals(SIGNOUT_LABEL)){
                         FirebaseAuth.getInstance().signOut();
                         FriendDB.getInstance(getContext()).dropDB();
+                        getActivity().finish();
                     }
 
                     if(config.getLabel().equals(USERNAME_LABEL)){

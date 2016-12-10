@@ -7,17 +7,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,7 +22,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.StaticConfig;
@@ -38,7 +34,6 @@ import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -343,6 +338,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final String name = listFriend.getListFriend().get(position).name;
         final String id = listFriend.getListFriend().get(position).id;
+        final String avata = listFriend.getListFriend().get(position).avata;
         ((ItemFriendViewHolder) holder).txtName.setText(name);
         ((View)((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -350,6 +346,12 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ID, id);
+                if(!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                    byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
+                    ChatActivity.bitmapAvataFriend = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                }else {
+                    ChatActivity.bitmapAvataFriend = null;
+                }
                 context.startActivity(intent);
             }
         });

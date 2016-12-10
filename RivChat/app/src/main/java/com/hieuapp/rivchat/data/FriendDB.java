@@ -58,12 +58,6 @@ public final class FriendDB {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         // Define a projection that specifies which columns from the database
 // you will actually use after this query.
-        String[] projection = {
-                FeedEntry.COLUMN_NAME_ID,
-                FeedEntry.COLUMN_NAME_NAME,
-                FeedEntry.COLUMN_NAME_EMAIL,
-                FeedEntry.COLUMN_NAME_AVATA
-        };
         try {
             Cursor cursor = db.rawQuery("select * from " + FeedEntry.TABLE_NAME, null);
             while (cursor.moveToNext()) {
@@ -84,6 +78,7 @@ public final class FriendDB {
     public void dropDB(){
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL(SQL_CREATE_ENTRIES);
     }
 
     /* Inner class that defines the table contents */
