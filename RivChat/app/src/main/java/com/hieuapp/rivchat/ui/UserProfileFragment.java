@@ -2,14 +2,14 @@ package com.hieuapp.rivchat.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
+import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.model.Configuration;
 import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.util.ImageUtils;
@@ -64,10 +66,7 @@ public class UserProfileFragment extends Fragment {
 
     private DatabaseReference userDB;
     private User myAccount;
-
     private Context context;
-
-
 
     public UserProfileFragment() {
         // Required empty public constructor
@@ -77,42 +76,35 @@ public class UserProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userDB = FirebaseDatabase.getInstance().getReference().child("user").child(MainActivity.UID);
-
-        ValueEventListener userListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //Lấy thông tin của user về và cập nhật lên giao diện
-                listConfig.clear();
-                myAccount = dataSnapshot.getValue(User.class);
-
-                Configuration userNameConfig = new Configuration(USERNAME_LABEL, myAccount.name, R.mipmap.ic_account_box);
-                listConfig.add(userNameConfig);
-
-                Configuration emailConfig = new Configuration(EMAIL_LABEL, myAccount.email, R.mipmap.ic_email);
-                listConfig.add(emailConfig);
-
-                Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
-                listConfig.add(signout);
-
-                if(infoAdapter != null){
-                    infoAdapter.notifyDataSetChanged();
-                }
-
-                if(tvUserName != null){
-                    tvUserName.setText(myAccount.name);
-                }
-
-                setImageAvatar(context, myAccount.avata);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //Có lỗi xảy ra, không lấy đc dữ liệu
-                Log.e(UserProfileFragment.class.getName(), "loadPost:onCancelled", databaseError.toException());
-            }
-        };
         userDB.addValueEventListener(userListener);
     }
+
+    private ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            //Lấy thông tin của user về và cập nhật lên giao diện
+            listConfig.clear();
+            myAccount = dataSnapshot.getValue(User.class);
+
+            updateArrayListInfo(myAccount);
+            if(infoAdapter != null){
+                infoAdapter.notifyDataSetChanged();
+            }
+
+            if(tvUserName != null){
+                tvUserName.setText(myAccount.name);
+            }
+
+            Toast.makeText(context, "Update user info successful", Toast.LENGTH_LONG).show();
+            setImageAvatar(context, myAccount.avata);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            //Có lỗi xảy ra, không lấy đc dữ liệu
+            Log.e(UserProfileFragment.class.getName(), "loadPost:onCancelled", databaseError.toException());
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -124,14 +116,11 @@ public class UserProfileFragment extends Fragment {
         avatar.setOnClickListener(onAvatarClick);
         tvUserName = (TextView)view.findViewById(R.id.tv_username);
 
-        initEmptyUser();
-
-        if(myAccount == null){
-            myAccount = new User();
-            myAccount.avata = "default";
-        }
-
+        SharedPreferenceHelper prefHelper = SharedPreferenceHelper.getInstance(context);
+        myAccount = prefHelper.getUserInfo();
+        updateArrayListInfo(myAccount);
         setImageAvatar(context, myAccount.avata);
+        tvUserName.setText(myAccount.name);
 
         recyclerView = (RecyclerView)view.findViewById(R.id.info_recycler_view);
         infoAdapter = new UserInfoAdapter(listConfig);
@@ -139,19 +128,35 @@ public class UserProfileFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(infoAdapter);
-
-        initEmptyUser();
-
         return view;
     }
 
+    /**
+     * Khi click vào avatar thì bắn intent mở trình xem ảnh mặc định để chọn ảnh
+     */
     private View.OnClickListener onAvatarClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+
+            new AlertDialog.Builder(context)
+                    .setTitle("Avatar")
+                    .setMessage("Are you sure change avatar profile?")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent();
+                            intent.setType("image/*");
+                            intent.setAction(Intent.ACTION_PICK);
+                            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    }).show();
         }
     };
 
@@ -165,9 +170,15 @@ public class UserProfileFragment extends Fragment {
             }
             try {
                 InputStream inputStream = context.getContentResolver().openInputStream(data.getData());
+
                 Bitmap imgBitmap = BitmapFactory.decodeStream(inputStream);
                 imgBitmap = ImageUtils.cropToSquare(imgBitmap);
-                String imageBase64 = ImageUtils.encodeBase64(imgBitmap);
+                InputStream is = ImageUtils.convertBitmapToInputStream(imgBitmap);
+                Bitmap liteImage = ImageUtils.makeImageLite(is,
+                        imgBitmap.getWidth(), imgBitmap.getHeight(),
+                        ImageUtils.AVATAR_WIDTH, ImageUtils.AVATAR_HEIGHt);
+
+                String imageBase64 = ImageUtils.encodeBase64(liteImage);
                 userDB.child("avata").setValue(imageBase64);
 
             } catch (FileNotFoundException e) {
@@ -176,13 +187,16 @@ public class UserProfileFragment extends Fragment {
         }
     }
 
-    public void initEmptyUser(){
+    /**
+     * Xóa list cũ và cập nhật lại list data mới
+     * @param myAccount
+     */
+    public void updateArrayListInfo(User myAccount){
         listConfig.clear();
-
-        Configuration userNameConfig = new Configuration(USERNAME_LABEL, "", R.mipmap.ic_account_box);
+        Configuration userNameConfig = new Configuration(USERNAME_LABEL, myAccount.name, R.mipmap.ic_account_box);
         listConfig.add(userNameConfig);
 
-        Configuration emailConfig = new Configuration(EMAIL_LABEL, "", R.mipmap.ic_email);
+        Configuration emailConfig = new Configuration(EMAIL_LABEL, myAccount.email, R.mipmap.ic_email);
         listConfig.add(emailConfig);
 
         Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
@@ -239,8 +253,50 @@ public class UserProfileFragment extends Fragment {
                     if(config.getLabel().equals(SIGNOUT_LABEL)){
                         FirebaseAuth.getInstance().signOut();
                     }
+
+                    if(config.getLabel().equals(USERNAME_LABEL)){
+                        View vewInflater = LayoutInflater.from(context)
+                                .inflate(R.layout.dialog_edit_username,  (ViewGroup) getView(), false);
+                        final EditText input = (EditText)vewInflater.findViewById(R.id.edit_username);
+                        input.setText(myAccount.name);
+                        /*Hiển thị dialog với dEitText cho phép người dùng nhập username mới*/
+                        new AlertDialog.Builder(context)
+                                .setTitle("Edit username")
+                                .setView(vewInflater)
+                                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        String newName = input.getText().toString();
+                                        if(!myAccount.name.equals(newName)){
+                                            changeUserName(newName);
+                                        }
+                                        dialogInterface.dismiss();
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                }).show();
+                    }
                 }
             });
+        }
+
+        /**
+         * Cập nhật username mới vào SharedPreference và thay đổi trên giao diện
+         */
+        private void changeUserName(String newName){
+            userDB.child("name").setValue(newName);
+
+
+            myAccount.name = newName;
+            SharedPreferenceHelper prefHelper = SharedPreferenceHelper.getInstance(context);
+            prefHelper.saveUserInfo(myAccount);
+
+            tvUserName.setText(newName);
+            updateArrayListInfo(myAccount);
         }
 
         @Override

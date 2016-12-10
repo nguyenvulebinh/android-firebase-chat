@@ -3,17 +3,23 @@ package com.hieuapp.rivchat.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Base64;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 /**
  * Created by hieuapp on 09/12/2016.
  */
 
 public class ImageUtils {
+
+    public static final int AVATAR_WIDTH = 256;
+    public static final int AVATAR_HEIGHt = 256;
 
     /**
      * Bo tròn ảnh avatar
@@ -73,4 +79,46 @@ public class ImageUtils {
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
+
+    /**
+     * Làm giảm số điểm ảnh xuống để tránh lỗi Firebase Database OutOfMemory
+     * @param is anh dau vao
+     * @param reqWidth kích thước chiều rộng sau khi giảm
+     * @param reqHeight kích thước chiều cao sau khi giảm
+     * @return
+     */
+    public static Bitmap makeImageLite(InputStream is, int width, int height,
+                                       int reqWidth, int reqHeight) {
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        // Calculate inSampleSize
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = inSampleSize;
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeStream(is, null, options);
+    }
+
+
+    public static InputStream convertBitmapToInputStream(Bitmap bitmap){
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+        return bs;
+    }
+
 }
