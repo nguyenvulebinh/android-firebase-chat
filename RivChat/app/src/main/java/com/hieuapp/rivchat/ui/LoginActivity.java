@@ -86,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     if(firstTimeAccess){
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        LoginActivity.this.finish();
                     }
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -27,8 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.StaticConfig;
+import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.ListFriend;
-import com.hieuapp.rivchat.model.User;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
@@ -160,10 +161,11 @@ public class FriendsFragment extends Fragment {
                                     .show();
                         }else {
                             HashMap userMap = (HashMap) ((HashMap)dataSnapshot.getValue()).get(id);
-                            User user = new User();
+                            Friend user = new Friend();
                             user.name = (String) userMap.get("name");
                             user.email = (String) userMap.get("email");
                             user.avata = (String) userMap.get("avata");
+                            user.id = id;
                             checkBeforAddFriend(id, user);
                         }
                     }
@@ -180,7 +182,7 @@ public class FriendsFragment extends Fragment {
          * Lay danh sach friend cua một UID
          *
          */
-        private void checkBeforAddFriend(final String idFriend, User userInfo){
+        private void checkBeforAddFriend(final String idFriend, Friend userInfo){
             dialogWait.setCancelable(false)
                     .setIcon(R.drawable.ic_add_friend)
                     .setTitle("Add friend....")
@@ -278,16 +280,17 @@ public class FriendsFragment extends Fragment {
      */
     private void getAllFriendInfo(){
         final AtomicInteger countFirendInfo = new AtomicInteger(listFriendID.size());
-        for(String id: listFriendID){
+        for(final String id: listFriendID){
             FirebaseDatabase.getInstance().getReference().child("user/"+id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.getValue() != null) {
-                        User user = new User();
+                        Friend user = new Friend();
                         HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
                         user.name = (String) mapUserInfo.get("name");
                         user.email = (String) mapUserInfo.get("email");
                         user.avata = (String) mapUserInfo.get("avata");
+                        user.id = id;
                         synchronized (dataListFriend) {
                             dataListFriend.getListFriend().add(user);
                         }
@@ -321,20 +324,25 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.rc_item_friend, parent, false);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("friendid", "");
-                context.startActivity(intent);
-            }
-        });
         return new ItemFriendViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((ItemFriendViewHolder) holder).txtName.setText(listFriend.getListFriend().get(position).name);
+        final String name = listFriend.getListFriend().get(position).name;
+        final String id = listFriend.getListFriend().get(position).id;
+        ((ItemFriendViewHolder) holder).txtName.setText(name);
+        ((View)((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, ChatActivity.class);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ID, id);
+                context.startActivity(intent);
+            }
+        });
+
+
         if(listFriend.getListFriend().get(position).message.text.length() > 0) {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
@@ -351,6 +359,8 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             ((ItemFriendViewHolder) holder).avata.setImageBitmap(src);
         }
+
+
 //        if (listFriend.getListFriend().get(position).status.isOnline) {
 //            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
 //        } else {

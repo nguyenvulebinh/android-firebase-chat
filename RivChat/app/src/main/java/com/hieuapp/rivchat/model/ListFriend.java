@@ -10,9 +10,9 @@ import java.util.Random;
  */
 
 public class ListFriend {
-    private ArrayList<User> listFriend;
+    private ArrayList<Friend> listFriend;
 
-    public ArrayList<User> getListFriend() {
+    public ArrayList<Friend> getListFriend() {
         return listFriend;
     }
 
@@ -31,7 +31,7 @@ public class ListFriend {
 //        }
     }
 
-    public void setListFriend(ArrayList<User> listFriend) {
+    public void setListFriend(ArrayList<Friend> listFriend) {
         this.listFriend = listFriend;
     }
 }
