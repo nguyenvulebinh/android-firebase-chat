@@ -98,8 +98,9 @@ public class UserProfileFragment extends Fragment {
                 tvUserName.setText(myAccount.name);
             }
 
-            Toast.makeText(context, "Update user info successful", Toast.LENGTH_LONG).show();
             setImageAvatar(context, myAccount.avata);
+            SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
+            preferenceHelper.saveUserInfo(myAccount);
         }
 
         @Override
@@ -182,6 +183,10 @@ public class UserProfileFragment extends Fragment {
                         ImageUtils.AVATAR_WIDTH, ImageUtils.AVATAR_HEIGHT);
 
                 String imageBase64 = ImageUtils.encodeBase64(liteImage);
+
+                myAccount.avata = imageBase64;
+                SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
+                preferenceHelper.saveUserInfo(myAccount);
                 userDB.child("avata").setValue(imageBase64);
 
             } catch (FileNotFoundException e) {

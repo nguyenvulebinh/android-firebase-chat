@@ -18,8 +18,8 @@ import java.io.InputStream;
 
 public class ImageUtils {
 
-    public static final int AVATAR_WIDTH = 256;
-    public static final int AVATAR_HEIGHT = 256;
+    public static final int AVATAR_WIDTH = 128;
+    public static final int AVATAR_HEIGHT = 128;
 
     /**
      * Bo tròn ảnh avatar
