@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -16,13 +17,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
@@ -38,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +62,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ArrayList<String> listFriendID = null;
     private LovelyProgressDialog dialogFindAllFriend;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    public static int ACTION_START_CHAT = 1;
 
     public FriendsFragment() {
         onClickFloatButton = new FragFriendClickFloatButton();
@@ -86,7 +92,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         recyclerListFrends.setLayoutManager(linearLayoutManager);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        adapter = new ListFriendsAdapter(getContext(), dataListFriend);
+        adapter = new ListFriendsAdapter(getContext(), dataListFriend, this);
         recyclerListFrends.setAdapter(adapter);
         dialogFindAllFriend = new LovelyProgressDialog(getContext());
         if (listFriendID == null) {
@@ -99,6 +105,14 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
             getListFriendUId();
         }
         return layout;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(ACTION_START_CHAT == requestCode){
+            ListFriendsAdapter.mapMark.put(data.getStringExtra("idFriend"), false);
+        }
     }
 
     @Override
@@ -357,10 +371,18 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ListFriend listFriend;
     private Context context;
+    public static Map<String, Query> mapQuery;
+    public static Map<String, ChildEventListener> mapChildListener;
+    public static Map<String, Boolean> mapMark;
+    private FriendsFragment fragment;
 
-    public ListFriendsAdapter(Context context, ListFriend listFriend) {
+    public ListFriendsAdapter(Context context, ListFriend listFriend, FriendsFragment fragment) {
         this.listFriend = listFriend;
         this.context = context;
+        mapQuery = new HashMap<>();
+        mapChildListener = new HashMap<>();
+        mapMark = new HashMap<>();
+        this.fragment = fragment;
     }
 
     @Override
@@ -370,7 +392,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final String name = listFriend.getListFriend().get(position).name;
         final String id = listFriend.getListFriend().get(position).id;
         final String avata = listFriend.getListFriend().get(position).avata;
@@ -378,6 +400,8 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((View) ((ItemFriendViewHolder) holder).txtName.getParent().getParent().getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT);
+                ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT);
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
                 ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
@@ -392,7 +416,9 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else {
                     ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
                 }
-                context.startActivity(intent);
+
+                mapMark.put(id, null);
+                fragment.startActivityForResult(intent, FriendsFragment.ACTION_START_CHAT);
             }
         });
 
@@ -400,37 +426,76 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (listFriend.getListFriend().get(position).message.text.length() > 0) {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
-            ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
+            if (!listFriend.getListFriend().get(position).message.text.startsWith(id)) {
+                ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
+                ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT);
+                ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT);
+            }else{
+                ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text.substring((id+"").length()));
+                ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT_BOLD);
+                ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT_BOLD);
+            }
             String time = new SimpleDateFormat("EEE, d MMM yyyy").format(new Date(listFriend.getListFriend().get(position).message.timestamp));
             String today = new SimpleDateFormat("EEE, d MMM yyyy").format(new Date(System.currentTimeMillis()));
             if (today.equals(time)) {
                 ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("HH:mm").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
-            }else{
+            } else {
                 ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("MMM d").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
             }
         } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
 
-            String idFriend = listFriend.getListFriend().get(position).id;
+            final String idFriend = listFriend.getListFriend().get(position).id;
             String idRoom = idFriend.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + idFriend).hashCode() + "" : "" + (idFriend + StaticConfig.UID).hashCode();
-            FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        String key = (String) ((HashMap) dataSnapshot.getValue()).keySet().iterator().next();
-                        HashMap mapMessage = (HashMap) ((HashMap) dataSnapshot.getValue()).get(key);
-                        listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+            if (mapQuery.get(idFriend) == null && mapChildListener.get(idFriend) == null) {
+                mapQuery.put(idFriend, FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1));
+                mapChildListener.put(idFriend, new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        HashMap mapMessage = (HashMap) dataSnapshot.getValue();
+                        if(mapMark.get(idFriend) != null) {
+                            if (!mapMark.get(idFriend)) {
+                                listFriend.getListFriend().get(position).message.text = idFriend + mapMessage.get("text");
+                            } else {
+                                listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+                            }
+                            notifyDataSetChanged();
+                            mapMark.put(idFriend, false);
+                        }else{
+                            listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+                            notifyDataSetChanged();
+                        }
                         listFriend.getListFriend().get(position).message.timestamp = (long) mapMessage.get("timestamp");
-                        notifyDataSetChanged();
                     }
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                }
-            });
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                mapQuery.get(idFriend).addChildEventListener(mapChildListener.get(idFriend));
+                mapMark.put(idFriend, true);
+            } else {
+                mapQuery.get(idFriend).removeEventListener(mapChildListener.get(idFriend));
+                mapQuery.get(idFriend).addChildEventListener(mapChildListener.get(idFriend));
+                mapMark.put(idFriend, true);
+            }
         }
         if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.default_avata);

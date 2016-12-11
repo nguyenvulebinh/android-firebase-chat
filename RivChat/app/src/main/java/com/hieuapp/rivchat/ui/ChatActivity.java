@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -116,6 +117,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             });
             recyclerChat.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home){
+            Intent result = new Intent();
+            result.putExtra("idFriend", idFriend.get(0));
+            setResult(RESULT_OK, result);
+            this.finish();
+        }
+        return true;
     }
 
     @Override
