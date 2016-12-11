@@ -48,7 +48,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by hieuttc on 05/12/2016.
  */
 
-public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView recyclerListFrends;
     private ListFriendsAdapter adapter;
@@ -235,8 +235,8 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
          * @param idFriend
          */
         private void addFriend(final String idFriend, boolean isIdFriend) {
-            if(idFriend != null) {
-                if(isIdFriend) {
+            if (idFriend != null) {
+                if (isIdFriend) {
                     FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -245,19 +245,19 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            dialogWait.dismiss();
-                            new LovelyInfoDialog(context)
-                                    .setTopColorRes(R.color.colorAccent)
-                                    .setIcon(R.drawable.ic_add_friend)
-                                    .setTitle("False")
-                                    .setMessage("False to add friend success")
-                                    .show();
-                        }
-                    });
-                }else{
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    dialogWait.dismiss();
+                                    new LovelyInfoDialog(context)
+                                            .setTopColorRes(R.color.colorAccent)
+                                            .setIcon(R.drawable.ic_add_friend)
+                                            .setTitle("False")
+                                            .setMessage("False to add friend success")
+                                            .show();
+                                }
+                            });
+                } else {
                     FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -266,20 +266,20 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            dialogWait.dismiss();
-                            new LovelyInfoDialog(context)
-                                    .setTopColorRes(R.color.colorAccent)
-                                    .setIcon(R.drawable.ic_add_friend)
-                                    .setTitle("False")
-                                    .setMessage("False to add friend success")
-                                    .show();
-                        }
-                    });
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    dialogWait.dismiss();
+                                    new LovelyInfoDialog(context)
+                                            .setTopColorRes(R.color.colorAccent)
+                                            .setIcon(R.drawable.ic_add_friend)
+                                            .setTitle("False")
+                                            .setMessage("False to add friend success")
+                                            .show();
+                                }
+                            });
                 }
-            }else{
+            } else {
                 dialogWait.dismiss();
                 new LovelyInfoDialog(context)
                         .setTopColorRes(R.color.colorPrimary)
@@ -397,22 +397,27 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
 
 
-
         if (listFriend.getListFriend().get(position).message.text.length() > 0) {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
-            ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("HH:mm").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
+            String time = new SimpleDateFormat("EEE, d MMM yyyy").format(new Date(listFriend.getListFriend().get(position).message.timestamp));
+            String today = new SimpleDateFormat("EEE, d MMM yyyy").format(new Date(System.currentTimeMillis()));
+            if (today.equals(time)) {
+                ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("HH:mm").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
+            }else{
+                ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("MMM d").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
+            }
         } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
 
             String idFriend = listFriend.getListFriend().get(position).id;
             String idRoom = idFriend.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + idFriend).hashCode() + "" : "" + (idFriend + StaticConfig.UID).hashCode();
-            FirebaseDatabase.getInstance().getReference().child("message/"+idRoom).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null){
+                    if (dataSnapshot.getValue() != null) {
                         String key = (String) ((HashMap) dataSnapshot.getValue()).keySet().iterator().next();
                         HashMap mapMessage = (HashMap) ((HashMap) dataSnapshot.getValue()).get(key);
                         listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
