@@ -33,7 +33,9 @@ import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -368,7 +370,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final String name = listFriend.getListFriend().get(position).name;
         final String id = listFriend.getListFriend().get(position).id;
         final String avata = listFriend.getListFriend().get(position).avata;
@@ -395,14 +397,35 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
 
 
+
         if (listFriend.getListFriend().get(position).message.text.length() > 0) {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
-            ((ItemFriendViewHolder) holder).txtTime.setText(listFriend.getListFriend().get(position).message.timestamp + ":00");
+            ((ItemFriendViewHolder) holder).txtTime.setText(new SimpleDateFormat("HH:mm").format(new Date(listFriend.getListFriend().get(position).message.timestamp)));
         } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
+
+            String idFriend = listFriend.getListFriend().get(position).id;
+            String idRoom = idFriend.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + idFriend).hashCode() + "" : "" + (idFriend + StaticConfig.UID).hashCode();
+            FirebaseDatabase.getInstance().getReference().child("message/"+idRoom).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue() != null){
+                        String key = (String) ((HashMap) dataSnapshot.getValue()).keySet().iterator().next();
+                        HashMap mapMessage = (HashMap) ((HashMap) dataSnapshot.getValue()).get(key);
+                        listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+                        listFriend.getListFriend().get(position).message.timestamp = (long) mapMessage.get("timestamp");
+                        notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
         if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.default_avata);
