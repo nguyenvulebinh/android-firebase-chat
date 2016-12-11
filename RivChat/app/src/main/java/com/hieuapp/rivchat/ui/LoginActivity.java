@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -84,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                     // User is signed in
                     StaticConfig.UID = user.getUid();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    if(firstTimeAccess){
+                    if (firstTimeAccess) {
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         LoginActivity.this.finish();
                     }
@@ -123,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == StaticConfig.REQUEST_CODE_REGISTER && resultCode == RESULT_OK){
+        if (requestCode == StaticConfig.REQUEST_CODE_REGISTER && resultCode == RESULT_OK) {
             authUtils.createUser(data.getStringExtra(StaticConfig.STR_EXTRA_USERNAME), data.getStringExtra(StaticConfig.STR_EXTRA_PASSWORD));
         }
     }
@@ -131,9 +132,9 @@ public class LoginActivity extends AppCompatActivity {
     public void clickLogin(View view) {
         String username = editTextUsername.getText().toString();
         String password = editTextPassword.getText().toString();
-        if(validate(username, password)){
+        if (validate(username, password)) {
             authUtils.signIn(username, password);
-        }else {
+        } else {
             Toast.makeText(this, "Invalid email or empty password", Toast.LENGTH_SHORT).show();
         }
     }
@@ -146,15 +147,15 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean validate(String emailStr, String password) {
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
         return (password.length() > 0 || password.equals(";")) && matcher.find();
     }
 
     public void clickResetPassword(View view) {
         String username = editTextUsername.getText().toString();
-        if(validate(username, ";")){
+        if (validate(username, ";")) {
             authUtils.resetPassword(username);
-        }else {
+        } else {
             Toast.makeText(this, "Invalid email", Toast.LENGTH_SHORT).show();
         }
     }
@@ -162,9 +163,10 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Dinh nghia cac ham tien ich cho quas trinhf dang nhap, dang ky,...
      */
-    class AuthUtils{
+    class AuthUtils {
         /**
          * Action register
+         *
          * @param email
          * @param password
          */
@@ -183,7 +185,7 @@ public class LoginActivity extends AppCompatActivity {
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
-                                new LovelyInfoDialog(LoginActivity.this){
+                                new LovelyInfoDialog(LoginActivity.this) {
                                     @Override
                                     public LovelyInfoDialog setConfirmButtonText(String text) {
                                         findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
@@ -209,12 +211,20 @@ public class LoginActivity extends AppCompatActivity {
                                 LoginActivity.this.finish();
                             }
                         }
-                    });
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            waitingDialog.dismiss();
+                        }
+                    })
+            ;
         }
 
 
         /**
          * Action Login
+         *
          * @param email
          * @param password
          */
@@ -234,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
                             waitingDialog.dismiss();
                             if (!task.isSuccessful()) {
                                 Log.w(TAG, "signInWithEmail:failed", task.getException());
-                                new LovelyInfoDialog(LoginActivity.this){
+                                new LovelyInfoDialog(LoginActivity.this) {
                                     @Override
                                     public LovelyInfoDialog setConfirmButtonText(String text) {
                                         findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
@@ -259,19 +269,26 @@ public class LoginActivity extends AppCompatActivity {
                                 LoginActivity.this.finish();
                             }
                         }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            waitingDialog.dismiss();
+                        }
                     });
         }
 
         /**
          * Action reset password
+         *
          * @param email
          */
-        void resetPassword(final String email){
+        void resetPassword(final String email) {
             mAuth.sendPasswordResetEmail(email)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            new LovelyInfoDialog(LoginActivity.this){
+                            new LovelyInfoDialog(LoginActivity.this) {
                                 @Override
                                 public LovelyInfoDialog setConfirmButtonText(String text) {
                                     findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
@@ -290,14 +307,37 @@ public class LoginActivity extends AppCompatActivity {
                                     .setConfirmButtonText("Ok")
                                     .show();
                         }
-                    });
+                    })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    new LovelyInfoDialog(LoginActivity.this) {
+                        @Override
+                        public LovelyInfoDialog setConfirmButtonText(String text) {
+                            findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dismiss();
+                                }
+                            });
+                            return super.setConfirmButtonText(text);
+                        }
+                    }
+                            .setTopColorRes(R.color.colorAccent)
+                            .setIcon(R.drawable.ic_pass_reset)
+                            .setTitle("False")
+                            .setMessage("False to sent email to " + email)
+                            .setConfirmButtonText("Ok")
+                            .show();
+                }
+            });
         }
 
         /**
          * Luu thong tin user info cho nguoi dung dang nhap
          */
-        void saveUserInfo(){
-            FirebaseDatabase.getInstance().getReference().child("user/"+StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
+        void saveUserInfo() {
+            FirebaseDatabase.getInstance().getReference().child("user/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     waitingDialog.dismiss();
@@ -319,12 +359,12 @@ public class LoginActivity extends AppCompatActivity {
         /**
          * Khoi tao thong tin mac dinh cho tai khoan moi
          */
-        void initNewUserInfo(){
+        void initNewUserInfo() {
             User newUser = new User();
             newUser.email = user.getEmail();
             newUser.name = user.getEmail().substring(0, user.getEmail().indexOf("@"));
             newUser.avata = StaticConfig.STR_DEFAULT_BASE64;
-            FirebaseDatabase.getInstance().getReference().child("user/"+user.getUid()).setValue(newUser);
+            FirebaseDatabase.getInstance().getReference().child("user/" + user.getUid()).setValue(newUser);
         }
     }
 }

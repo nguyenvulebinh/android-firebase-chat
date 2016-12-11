@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -201,7 +202,7 @@ public class FriendsFragment extends Fragment {
                         .setMessage("Add friend success")
                         .show();
             } else {
-                addFriend(idFriend);
+                addFriend(idFriend, true);
                 listFriendID.add(idFriend);
                 dataListFriend.getListFriend().add(userInfo);
                 FriendDB.getInstance(getContext()).addFriend(userInfo);
@@ -214,37 +215,60 @@ public class FriendsFragment extends Fragment {
          *
          * @param idFriend
          */
-        private void addFriend(final String idFriend) {
-            final AtomicInteger countFirendInfo = new AtomicInteger(2);
-            FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (countFirendInfo.decrementAndGet() == 0) {
-                        dialogWait.dismiss();
-                        new LovelyInfoDialog(context)
-                                .setTopColorRes(R.color.colorPrimary)
-                                .setIcon(R.drawable.ic_add_friend)
-                                .setTitle("Success")
-                                .setMessage("Add friend success")
-                                .show();
-                    }
+        private void addFriend(final String idFriend, boolean isIdFriend) {
+            if(idFriend != null) {
+                if(isIdFriend) {
+                    FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                addFriend(idFriend, false);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            dialogWait.dismiss();
+                            new LovelyInfoDialog(context)
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_add_friend)
+                                    .setTitle("False")
+                                    .setMessage("False to add friend success")
+                                    .show();
+                        }
+                    });
+                }else{
+                    FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                addFriend(null, false);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            dialogWait.dismiss();
+                            new LovelyInfoDialog(context)
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_add_friend)
+                                    .setTitle("False")
+                                    .setMessage("False to add friend success")
+                                    .show();
+                        }
+                    });
                 }
-            });
-
-            FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (countFirendInfo.decrementAndGet() == 0) {
-                        dialogWait.dismiss();
-                        new LovelyInfoDialog(context)
-                                .setTopColorRes(R.color.colorPrimary)
-                                .setIcon(R.drawable.ic_add_friend)
-                                .setTitle("Success")
-                                .setMessage("Add friend success")
-                                .show();
-                    }
-                }
-            });
+            }else{
+                dialogWait.dismiss();
+                new LovelyInfoDialog(context)
+                        .setTopColorRes(R.color.colorPrimary)
+                        .setIcon(R.drawable.ic_add_friend)
+                        .setTitle("Success")
+                        .setMessage("Add friend success")
+                        .show();
+            }
         }
     }
 
