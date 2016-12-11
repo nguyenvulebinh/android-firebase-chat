@@ -1,6 +1,7 @@
 package com.hieuapp.rivchat.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -59,7 +60,7 @@ public class GroupFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(context, "Add Group", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getContext(), AddGroupActivity.class));
         }
     }
 }

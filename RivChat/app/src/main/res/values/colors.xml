@@ -7,6 +7,7 @@
     <color name="transparent">#00000000</color>
     <color name="colorCardView">#f7f7f7</color>
     <color name="grey_200">#EEEEEE</color>
+    <color name="grey_500">#a4a4a4</color>
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_800">#212121</color>
 </resources>

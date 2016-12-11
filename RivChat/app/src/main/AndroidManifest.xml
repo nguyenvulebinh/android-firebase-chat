@@ -35,6 +35,8 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"/>
+        <activity android:name=".ui.AddGroupActivity"
+            android:theme="@style/MyThemeNoActionbar"/>
     </application>
 
 </manifest>

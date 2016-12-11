@@ -12,4 +12,5 @@
     <string name="register">REGISTER</string>
 
     <string name="hint_username">Enter a new username</string>
+    <string name="enter_group_name">Enter group name</string>
 </resources>
