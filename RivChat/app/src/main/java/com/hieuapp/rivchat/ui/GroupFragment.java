@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -41,11 +42,13 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by hieuttc on 05/12/2016.
  */
 
-public class GroupFragment extends Fragment {
+public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
     private RecyclerView recyclerListGroups;
     public FragGroupClickFloatButton onClickFloatButton;
     private ArrayList<Group> listGroup;
     private ListGroupsAdapter adapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     public GroupFragment() {
         // Required empty public constructor
     }
@@ -61,6 +64,8 @@ public class GroupFragment extends Fragment {
         View layout = inflater.inflate(R.layout.fragment_group, container, false);
         listGroup = new ArrayList<>();
         recyclerListGroups = (RecyclerView) layout.findViewById(R.id.recycleListGroup);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         recyclerListGroups.setLayoutManager(layoutManager);
         adapter = new ListGroupsAdapter(getContext(), listGroup);
@@ -99,6 +104,7 @@ public class GroupFragment extends Fragment {
     private void getGroupInfo(final int indexGroup){
         if(indexGroup == listGroup.size()){
             adapter.notifyDataSetChanged();
+            mSwipeRefreshLayout.setRefreshing(false);
         }else {
             FirebaseDatabase.getInstance().getReference().child("group/"+listGroup.get(indexGroup).id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -125,6 +131,13 @@ public class GroupFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onRefresh() {
+        listGroup.clear();
+        ListGroupsAdapter.listFriend = null;
+        getListGroup();
+    }
+
     public class FragGroupClickFloatButton implements View.OnClickListener{
 
         Context context;
@@ -142,7 +155,7 @@ public class GroupFragment extends Fragment {
 class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ArrayList<Group> listGroup;
-    private ListFriend listFriend = null;
+    public static ListFriend listFriend = null;
     private Context context;
     public ListGroupsAdapter(Context context,ArrayList<Group> listGroup){
         this.context = context;

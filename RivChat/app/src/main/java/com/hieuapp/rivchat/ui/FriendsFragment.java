@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -45,14 +46,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by hieuttc on 05/12/2016.
  */
 
-public class FriendsFragment extends Fragment {
+public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView recyclerListFrends;
     private ListFriendsAdapter adapter;
     public FragFriendClickFloatButton onClickFloatButton;
     private ListFriend dataListFriend = null;
     private ArrayList<String> listFriendID = null;
-    LovelyProgressDialog dialogFindAllFriend;
+    private LovelyProgressDialog dialogFindAllFriend;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public FriendsFragment() {
         onClickFloatButton = new FragFriendClickFloatButton();
@@ -80,14 +82,29 @@ public class FriendsFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerListFrends = (RecyclerView) layout.findViewById(R.id.recycleListFriend);
         recyclerListFrends.setLayoutManager(linearLayoutManager);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
         adapter = new ListFriendsAdapter(getContext(), dataListFriend);
         recyclerListFrends.setAdapter(adapter);
         dialogFindAllFriend = new LovelyProgressDialog(getContext());
         if (listFriendID == null) {
             listFriendID = new ArrayList<>();
+            dialogFindAllFriend.setCancelable(false)
+                    .setIcon(R.drawable.ic_add_friend)
+                    .setTitle("Get all friend....")
+                    .setTopColorRes(R.color.colorPrimary)
+                    .show();
             getListFriendUId();
         }
         return layout;
+    }
+
+    @Override
+    public void onRefresh() {
+        listFriendID.clear();
+        dataListFriend.getListFriend().clear();
+        FriendDB.getInstance(getContext()).dropDB();
+        getListFriendUId();
     }
 
     public class FragFriendClickFloatButton implements View.OnClickListener {
@@ -276,12 +293,6 @@ public class FriendsFragment extends Fragment {
      * Lay danh sach ban be tren server
      */
     private void getListFriendUId() {
-        dialogFindAllFriend.setCancelable(false)
-                .setIcon(R.drawable.ic_add_friend)
-                .setTitle("Get all friend....")
-                .setTopColorRes(R.color.colorPrimary)
-                .show();
-
         FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -312,6 +323,7 @@ public class FriendsFragment extends Fragment {
             //save list friend
             adapter.notifyDataSetChanged();
             dialogFindAllFriend.dismiss();
+            mSwipeRefreshLayout.setRefreshing(false);
         } else {
             final String id = listFriendID.get(index);
             FirebaseDatabase.getInstance().getReference().child("user/" + id).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -371,11 +383,12 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode());
                 ChatActivity.bitmapAvataFriend = new HashMap<>();
+                ChatActivity.bitmapAvataFriend = new HashMap<>();
                 if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
                     ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
                 } else {
-                    ChatActivity.bitmapAvataFriend = null;
+                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
                 }
                 context.startActivity(intent);
             }
