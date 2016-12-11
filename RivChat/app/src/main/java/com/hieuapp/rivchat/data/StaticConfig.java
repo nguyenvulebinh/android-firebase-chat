@@ -18,5 +18,6 @@ public class StaticConfig {
     public static String INTENT_KEY_CHAT_FRIEND = "friendname";
     public static String INTENT_KEY_CHAT_AVATA = "friendavata";
     public static String INTENT_KEY_CHAT_ID = "friendid";
+    public static String INTENT_KEY_CHAT_ROOM_ID = "roomid";
 
 }

@@ -1,6 +1,7 @@
 package com.hieuapp.rivchat.model;
 
 import com.hieuapp.rivchat.MainActivity;
+import com.hieuapp.rivchat.data.StaticConfig;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,18 +18,16 @@ public class ListFriend {
     }
 
     public ListFriend(){
-        //Test init 10 item
         listFriend = new ArrayList<>();
-//        Random random = new Random(System.currentTimeMillis());
-//        for(int i = 0; i <10; i++){
-//            User temp = new User();
-//            temp.name ="Nguyen Binh";
-//            temp.message.text = "Chao ngay moi";
-//            temp.message.timestamp = 12;
-//            temp.status.isOnline = (random.nextInt() % 2 == 0);
-//            temp.avata = MainActivity.STR_DEFAULT_BASE64;
-//            listFriend.add(temp);
-//        }
+    }
+
+    public String getAvataById(String id){
+        for(Friend friend: listFriend){
+            if(id.equals(friend.id)){
+                return friend.avata;
+            }
+        }
+        return "";
     }
 
     public void setListFriend(ArrayList<Friend> listFriend) {

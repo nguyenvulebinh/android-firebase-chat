@@ -20,12 +20,14 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Consersation;
 import com.hieuapp.rivchat.model.Message;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -40,36 +42,37 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     public static final int VIEW_TYPE_FRIEND_MESSAGE = 1;
     private ListMessageAdapter adapter;
     private String roomId;
-    private String idFriend;
+    private ArrayList<CharSequence> idFriend;
     private Consersation consersation;
     private ImageButton btnSend;
     private EditText editWriteMessage;
     private LinearLayoutManager linearLayoutManager;
-    public static Bitmap bitmapAvataFriend;
-    public static Bitmap bitmapAvataUser;
+    public static HashMap<String, Bitmap> bitmapAvataFriend;
+    public Bitmap bitmapAvataUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Intent intentData = getIntent();
-        idFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ID);
+        idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
+        roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
         String nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
+
         consersation = new Consersation();
         btnSend = (ImageButton) findViewById(R.id.btnSend);
         btnSend.setOnClickListener(this);
 
         String base64AvataUser = SharedPreferenceHelper.getInstance(this).getUserInfo().avata;
-        if(!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+        if (!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             byte[] decodedString = Base64.decode(base64AvataUser, Base64.DEFAULT);
             bitmapAvataUser = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        }else {
+        } else {
             bitmapAvataUser = null;
         }
 
         editWriteMessage = (EditText) findViewById(R.id.editWriteMessage);
         if (idFriend != null && nameFriend != null) {
-            roomId = idFriend.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + idFriend).hashCode() + "" : "" + (idFriend + StaticConfig.UID).hashCode();
             getSupportActionBar().setTitle(nameFriend);
             linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             recyclerChat = (RecyclerView) findViewById(R.id.recyclerChat);
@@ -124,7 +127,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 Message newMessage = new Message();
                 newMessage.text = content;
                 newMessage.idSender = StaticConfig.UID;
-                newMessage.idReceiver = idFriend;
+                newMessage.idReceiver = roomId;
                 newMessage.timestamp = System.currentTimeMillis();
                 FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
             }
@@ -136,9 +139,10 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private Consersation consersation;
-    private Bitmap bitmapAvata;
+    private HashMap<String, Bitmap> bitmapAvata;
     private Bitmap bitmapAvataUser;
-    public ListMessageAdapter(Context context, Consersation consersation, Bitmap bitmapAvata, Bitmap bitmapAvataUser) {
+
+    public ListMessageAdapter(Context context, Consersation consersation, HashMap<String, Bitmap> bitmapAvata, Bitmap bitmapAvataUser) {
         this.context = context;
         this.consersation = consersation;
         this.bitmapAvata = bitmapAvata;
@@ -161,12 +165,31 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemMessageFriendHolder) {
             ((ItemMessageFriendHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
-            if(bitmapAvata != null) {
-                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(bitmapAvata);
+            Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
+            if (currentAvata != null) {
+                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
+            } else {
+                final String id = consersation.getListMessageData().get(position).idSender;
+                FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            String avataStr = (String) dataSnapshot.getValue();
+                            byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
+                            ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                            notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         } else if (holder instanceof ItemMessageUserHolder) {
             ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
-            if(bitmapAvataUser != null) {
+            if (bitmapAvataUser != null) {
                 ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
             }
         }

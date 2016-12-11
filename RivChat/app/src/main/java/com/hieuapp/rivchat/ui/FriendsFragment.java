@@ -66,11 +66,11 @@ public class FriendsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        if(dataListFriend == null){
+        if (dataListFriend == null) {
             dataListFriend = FriendDB.getInstance(getContext()).getListFriend();
-            if(dataListFriend.getListFriend().size() > 0){
+            if (dataListFriend.getListFriend().size() > 0) {
                 listFriendID = new ArrayList<>();
-                for(Friend friend: dataListFriend.getListFriend()){
+                for (Friend friend : dataListFriend.getListFriend()) {
                     listFriendID.add(friend.id);
                 }
             }
@@ -82,7 +82,7 @@ public class FriendsFragment extends Fragment {
         adapter = new ListFriendsAdapter(getContext(), dataListFriend);
         recyclerListFrends.setAdapter(adapter);
         dialogFindAllFriend = new LovelyProgressDialog(getContext());
-        if(listFriendID == null){
+        if (listFriendID == null) {
             listFriendID = new ArrayList<>();
             getListFriendUId();
         }
@@ -96,7 +96,7 @@ public class FriendsFragment extends Fragment {
         public FragFriendClickFloatButton() {
         }
 
-        public FragFriendClickFloatButton getInstance(Context context){
+        public FragFriendClickFloatButton getInstance(Context context) {
             this.context = context;
             dialogWait = new LovelyProgressDialog(context);
             return this;
@@ -155,16 +155,16 @@ public class FriendsFragment extends Fragment {
                                 .setMessage("Email not found")
                                 .show();
                     } else {
-                        String id = ((HashMap)dataSnapshot.getValue()).keySet().iterator().next().toString();
-                        if(id.equals(StaticConfig.UID)){
+                        String id = ((HashMap) dataSnapshot.getValue()).keySet().iterator().next().toString();
+                        if (id.equals(StaticConfig.UID)) {
                             new LovelyInfoDialog(context)
                                     .setTopColorRes(R.color.colorAccent)
                                     .setIcon(R.drawable.ic_add_friend)
                                     .setTitle("Fail")
                                     .setMessage("Email not valid")
                                     .show();
-                        }else {
-                            HashMap userMap = (HashMap) ((HashMap)dataSnapshot.getValue()).get(id);
+                        } else {
+                            HashMap userMap = (HashMap) ((HashMap) dataSnapshot.getValue()).get(id);
                             Friend user = new Friend();
                             user.name = (String) userMap.get("name");
                             user.email = (String) userMap.get("email");
@@ -184,9 +184,8 @@ public class FriendsFragment extends Fragment {
 
         /**
          * Lay danh sach friend cua một UID
-         *
          */
-        private void checkBeforAddFriend(final String idFriend, Friend userInfo){
+        private void checkBeforAddFriend(final String idFriend, Friend userInfo) {
             dialogWait.setCancelable(false)
                     .setIcon(R.drawable.ic_add_friend)
                     .setTitle("Add friend....")
@@ -194,14 +193,14 @@ public class FriendsFragment extends Fragment {
                     .show();
 
             //Check xem da ton tai id trong danh sach id chua
-            if(listFriendID.contains(idFriend)){
+            if (listFriendID.contains(idFriend)) {
                 new LovelyInfoDialog(context)
                         .setTopColorRes(R.color.colorPrimary)
                         .setIcon(R.drawable.ic_add_friend)
                         .setTitle("Success")
                         .setMessage("Add friend success")
                         .show();
-            }else{
+            } else {
                 addFriend(idFriend);
                 listFriendID.add(idFriend);
                 dataListFriend.getListFriend().add(userInfo);
@@ -212,14 +211,15 @@ public class FriendsFragment extends Fragment {
 
         /**
          * Add friend
+         *
          * @param idFriend
          */
-        private void addFriend(final String idFriend){
+        private void addFriend(final String idFriend) {
             final AtomicInteger countFirendInfo = new AtomicInteger(2);
-            FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
+            FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    if(countFirendInfo.decrementAndGet() == 0) {
+                    if (countFirendInfo.decrementAndGet() == 0) {
                         dialogWait.dismiss();
                         new LovelyInfoDialog(context)
                                 .setTopColorRes(R.color.colorPrimary)
@@ -231,10 +231,10 @@ public class FriendsFragment extends Fragment {
                 }
             });
 
-            FirebaseDatabase.getInstance().getReference().child("friend/"+idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+            FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    if(countFirendInfo.decrementAndGet() == 0) {
+                    if (countFirendInfo.decrementAndGet() == 0) {
                         dialogWait.dismiss();
                         new LovelyInfoDialog(context)
                                 .setTopColorRes(R.color.colorPrimary)
@@ -251,25 +251,25 @@ public class FriendsFragment extends Fragment {
     /**
      * Lay danh sach ban be tren server
      */
-    private void getListFriendUId(){
+    private void getListFriendUId() {
         dialogFindAllFriend.setCancelable(false)
                 .setIcon(R.drawable.ic_add_friend)
                 .setTitle("Get all friend....")
                 .setTopColorRes(R.color.colorPrimary)
                 .show();
 
-        FirebaseDatabase.getInstance().getReference().child("friend/"+StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null) {
+                if (dataSnapshot.getValue() != null) {
                     HashMap mapRecord = (HashMap) dataSnapshot.getValue();
                     Iterator listKey = mapRecord.keySet().iterator();
                     while (listKey.hasNext()) {
                         String key = listKey.next().toString();
                         listFriendID.add(mapRecord.get(key).toString());
                     }
-                    getAllFriendInfo();
-                }else{
+                    getAllFriendInfo(0);
+                } else {
                     dialogFindAllFriend.dismiss();
                 }
             }
@@ -283,30 +283,27 @@ public class FriendsFragment extends Fragment {
     /**
      * Truy cap bang user lay thong tin id nguoi dung
      */
-    private void getAllFriendInfo(){
-        final AtomicInteger countFirendInfo = new AtomicInteger(listFriendID.size());
-        for(final String id: listFriendID){
-            FirebaseDatabase.getInstance().getReference().child("user/"+id).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void getAllFriendInfo(final int index) {
+        if (index == listFriendID.size()) {
+            //save list friend
+            adapter.notifyDataSetChanged();
+            dialogFindAllFriend.dismiss();
+        } else {
+            final String id = listFriendID.get(index);
+            FirebaseDatabase.getInstance().getReference().child("user/" + id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null) {
+                    if (dataSnapshot.getValue() != null) {
                         Friend user = new Friend();
                         HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
                         user.name = (String) mapUserInfo.get("name");
                         user.email = (String) mapUserInfo.get("email");
                         user.avata = (String) mapUserInfo.get("avata");
                         user.id = id;
-                        synchronized (dataListFriend) {
-                            dataListFriend.getListFriend().add(user);
-                        }
-                        int curent = countFirendInfo.decrementAndGet();
-                        if (curent == 0) {
-                            //save list friend
-                            FriendDB.getInstance(getContext()).addListFriend(dataListFriend);
-                            adapter.notifyDataSetChanged();
-                            dialogFindAllFriend.dismiss();
-                        }
+                        dataListFriend.getListFriend().add(user);
+                        FriendDB.getInstance(getContext()).addFriend(user);
                     }
+                    getAllFriendInfo(index + 1);
                 }
 
                 @Override
@@ -340,16 +337,20 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String id = listFriend.getListFriend().get(position).id;
         final String avata = listFriend.getListFriend().get(position).avata;
         ((ItemFriendViewHolder) holder).txtName.setText(name);
-        ((View)((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
+        ((View) ((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
-                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ID, id);
-                if(!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
+                idFriend.add(id);
+                intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode());
+                ChatActivity.bitmapAvataFriend = new HashMap<>();
+                if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
-                    ChatActivity.bitmapAvataFriend = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                }else {
+                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                } else {
                     ChatActivity.bitmapAvataFriend = null;
                 }
                 context.startActivity(intent);
@@ -357,18 +358,18 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
 
 
-        if(listFriend.getListFriend().get(position).message.text.length() > 0) {
+        if (listFriend.getListFriend().get(position).message.text.length() > 0) {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.VISIBLE);
             ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
             ((ItemFriendViewHolder) holder).txtTime.setText(listFriend.getListFriend().get(position).message.timestamp + ":00");
-        }else{
+        } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
         }
         if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             ((ItemFriendViewHolder) holder).avata.setImageResource(R.drawable.default_avata);
-        }else{
+        } else {
             byte[] decodedString = Base64.decode(listFriend.getListFriend().get(position).avata, Base64.DEFAULT);
             Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             ((ItemFriendViewHolder) holder).avata.setImageBitmap(src);
