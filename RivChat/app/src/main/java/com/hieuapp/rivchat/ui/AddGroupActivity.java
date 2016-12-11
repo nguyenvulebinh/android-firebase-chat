@@ -7,12 +7,15 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,8 @@ public class AddGroupActivity extends AppCompatActivity {
     private ListFriend listFriend;
     private LinearLayout btnAddGroup;
     private ArrayList<String> listIDChoose;
+    private EditText editTextGroupName;
+    private TextView txtGroupIcon;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,13 +51,36 @@ public class AddGroupActivity extends AppCompatActivity {
         listFriend = FriendDB.getInstance(this).getListFriend();
         listIDChoose = new ArrayList<>();
         btnAddGroup = (LinearLayout) findViewById(R.id.btnAddGroup);
+        editTextGroupName = (EditText) findViewById(R.id.editGroupName);
+        txtGroupIcon = (TextView) findViewById(R.id.icon_group);
+        editTextGroupName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                txtGroupIcon.setText((charSequence.charAt(0)+"").toUpperCase());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
         btnAddGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (listIDChoose.size() < 2) {
                     Toast.makeText(AddGroupActivity.this, "Add at lease two people to create group", Toast.LENGTH_SHORT).show();
                 } else {
-                    AddGroupActivity.this.finish();
+                    if(editTextGroupName.getText().length() == 0){
+                        Toast.makeText(AddGroupActivity.this, "Enter group name", Toast.LENGTH_SHORT).show();
+                    }else {
+                        AddGroupActivity.this.finish();
+                    }
                 }
             }
         });

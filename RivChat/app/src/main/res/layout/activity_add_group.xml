@@ -48,6 +48,7 @@
             android:textSize="30sp" />
 
         <EditText
+            android:id="@+id/editGroupName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
