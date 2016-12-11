@@ -79,7 +79,7 @@ public class UserProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
-        userDB.addValueEventListener(userListener);
+        userDB.addListenerForSingleValueEvent(userListener);
     }
 
     private ValueEventListener userListener = new ValueEventListener() {
@@ -216,7 +216,7 @@ public class UserProfileFragment extends Fragment {
         //Nếu chưa có avatar thì để hình mặc định
         Bitmap src;
         if(imgBase64.equals("default")){
-            src = BitmapFactory.decodeResource(res, R.drawable.user_default);
+            src = BitmapFactory.decodeResource(res, R.drawable.default_avata);
         }else {
             byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
             src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
