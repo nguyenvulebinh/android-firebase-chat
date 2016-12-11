@@ -375,7 +375,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String id = listFriend.getListFriend().get(position).id;
         final String avata = listFriend.getListFriend().get(position).avata;
         ((ItemFriendViewHolder) holder).txtName.setText(name);
-        ((View) ((ItemFriendViewHolder) holder).txtName.getParent()).setOnClickListener(new View.OnClickListener() {
+        ((View) ((ItemFriendViewHolder) holder).txtName.getParent().getParent().getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, ChatActivity.class);
