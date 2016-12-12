@@ -28,6 +28,7 @@ import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Consersation;
 import com.hieuapp.rivchat.model.Message;
+import com.hieuapp.rivchat.service.ServiceUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayoutManager linearLayoutManager;
     public static HashMap<String, Bitmap> bitmapAvataFriend;
     public Bitmap bitmapAvataUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,9 +134,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public void onBackPressed() {
+        Intent result = new Intent();
+        result.putExtra("idFriend", idFriend.get(0));
+        setResult(RESULT_OK, result);
+        this.finish();
+    }
+
+    @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btnSend) {
-            String content = editWriteMessage.getText().toString();
+            String content = editWriteMessage.getText().toString().trim();
             if (content.length() > 0) {
                 editWriteMessage.setText("");
                 Message newMessage = new Message();

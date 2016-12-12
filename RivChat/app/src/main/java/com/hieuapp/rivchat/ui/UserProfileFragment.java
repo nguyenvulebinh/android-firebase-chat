@@ -39,6 +39,8 @@ import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Configuration;
 import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.User;
+import com.hieuapp.rivchat.service.FriendChatService;
+import com.hieuapp.rivchat.service.ServiceUtils;
 import com.hieuapp.rivchat.util.ImageUtils;
 
 import java.io.FileNotFoundException;
@@ -263,6 +265,7 @@ public class UserProfileFragment extends Fragment {
                         FirebaseAuth.getInstance().signOut();
                         FriendDB.getInstance(getContext()).dropDB();
                         GroupDB.getInstance(getContext()).dropDB();
+                        ServiceUtils.stopServiceFriendChat(getContext().getApplicationContext(), true);
                         getActivity().finish();
                     }
 

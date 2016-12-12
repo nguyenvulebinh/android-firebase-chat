@@ -41,6 +41,7 @@ public final class FriendDB {
         values.put(FeedEntry.COLUMN_NAME_ID, friend.id);
         values.put(FeedEntry.COLUMN_NAME_NAME, friend.name);
         values.put(FeedEntry.COLUMN_NAME_EMAIL, friend.email);
+        values.put(FeedEntry.COLUMN_NAME_ID_ROOM, friend.idRoom);
         values.put(FeedEntry.COLUMN_NAME_AVATA, friend.avata);
         // Insert the new row, returning the primary key value of the new row
         return db.insert(FeedEntry.TABLE_NAME, null, values);
@@ -65,7 +66,8 @@ public final class FriendDB {
                 friend.id = cursor.getString(0);
                 friend.name = cursor.getString(1);
                 friend.email = cursor.getString(2);
-                friend.avata = cursor.getString(3);
+                friend.idRoom = cursor.getString(3);
+                friend.avata = cursor.getString(4);
                 listFriend.getListFriend().add(friend);
             }
             cursor.close();
@@ -87,6 +89,7 @@ public final class FriendDB {
         static final String COLUMN_NAME_ID = "friendID";
         static final String COLUMN_NAME_NAME = "name";
         static final String COLUMN_NAME_EMAIL = "email";
+        static final String COLUMN_NAME_ID_ROOM = "idRoom";
         static final String COLUMN_NAME_AVATA = "avata";
     }
 
@@ -97,6 +100,7 @@ public final class FriendDB {
                     FeedEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY," +
                     FeedEntry.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
                     FeedEntry.COLUMN_NAME_EMAIL + TEXT_TYPE + COMMA_SEP +
+                    FeedEntry.COLUMN_NAME_ID_ROOM + TEXT_TYPE + COMMA_SEP +
                     FeedEntry.COLUMN_NAME_AVATA + TEXT_TYPE + " )";
 
     private static final String SQL_DELETE_ENTRIES =

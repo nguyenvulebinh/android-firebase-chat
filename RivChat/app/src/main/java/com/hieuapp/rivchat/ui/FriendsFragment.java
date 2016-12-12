@@ -1,5 +1,6 @@
 package com.hieuapp.rivchat.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,6 +34,8 @@ import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.ListFriend;
+import com.hieuapp.rivchat.service.FriendChatService;
+import com.hieuapp.rivchat.service.ServiceUtils;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
@@ -110,7 +113,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(ACTION_START_CHAT == requestCode){
+        if(ACTION_START_CHAT == requestCode && data != null && ListFriendsAdapter.mapMark != null){
             ListFriendsAdapter.mapMark.put(data.getStringExtra("idFriend"), false);
         }
     }
@@ -204,6 +207,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             user.email = (String) userMap.get("email");
                             user.avata = (String) userMap.get("avata");
                             user.id = id;
+                            user.idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
                             checkBeforAddFriend(id, user);
                         }
                     }
@@ -352,6 +356,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         user.email = (String) mapUserInfo.get("email");
                         user.avata = (String) mapUserInfo.get("avata");
                         user.id = id;
+                        user.idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
                         dataListFriend.getListFriend().add(user);
                         FriendDB.getInstance(getContext()).addFriend(user);
                     }
@@ -395,6 +400,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final String name = listFriend.getListFriend().get(position).name;
         final String id = listFriend.getListFriend().get(position).id;
+        final String idRoom = listFriend.getListFriend().get(position).idRoom;
         final String avata = listFriend.getListFriend().get(position).avata;
         ((ItemFriendViewHolder) holder).txtName.setText(name);
         ((View) ((ItemFriendViewHolder) holder).txtName.getParent().getParent().getParent()).setOnClickListener(new View.OnClickListener() {
@@ -407,7 +413,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
                 idFriend.add(id);
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
-                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode());
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
                 ChatActivity.bitmapAvataFriend = new HashMap<>();
                 ChatActivity.bitmapAvataFriend = new HashMap<>();
                 if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
@@ -445,9 +451,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
-
             final String idFriend = listFriend.getListFriend().get(position).id;
-            String idRoom = idFriend.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + idFriend).hashCode() + "" : "" + (idFriend + StaticConfig.UID).hashCode();
             if (mapQuery.get(idFriend) == null && mapChildListener.get(idFriend) == null) {
                 mapQuery.put(idFriend, FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1));
                 mapChildListener.put(idFriend, new ChildEventListener() {

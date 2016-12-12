@@ -34,6 +34,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.model.User;
+import com.hieuapp.rivchat.service.FriendChatService;
+import com.hieuapp.rivchat.service.ServiceUtils;
 import com.hieuapp.rivchat.ui.FriendsFragment;
 import com.hieuapp.rivchat.ui.GroupFragment;
 import com.hieuapp.rivchat.ui.LoginActivity;
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        ServiceUtils.stopServiceFriendChat(getApplicationContext(), false);
     }
 
     @Override
@@ -106,6 +109,12 @@ public class MainActivity extends AppCompatActivity {
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ServiceUtils.startServiceFriendChat(getApplicationContext());
     }
 
     /**
@@ -137,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFrag(new FriendsFragment(), STR_FRIEND_FRAGMENT);
         adapter.addFrag(new GroupFragment(), STR_GROUP_FRAGMENT);
         adapter.addFrag(new UserProfileFragment(), STR_INFO_FRAGMENT);
-        floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(0)).onClickFloatButton.getInstance(this));
+        floatButton.setOnClickListener(((FriendsFragment) adapter.getItem(0)).onClickFloatButton.getInstance(this));
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(3);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -148,15 +157,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                if(adapter.getItem(position) instanceof FriendsFragment){
+                ServiceUtils.stopServiceFriendChat(MainActivity.this.getApplicationContext(), false);
+                if (adapter.getItem(position) instanceof FriendsFragment) {
                     floatButton.setVisibility(View.VISIBLE);
-                    floatButton.setOnClickListener(((FriendsFragment)adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
+                    floatButton.setOnClickListener(((FriendsFragment) adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
                     floatButton.setImageResource(R.drawable.plus);
-                }else if(adapter.getItem(position) instanceof GroupFragment){
+                } else if (adapter.getItem(position) instanceof GroupFragment) {
                     floatButton.setVisibility(View.VISIBLE);
-                    floatButton.setOnClickListener(((GroupFragment)adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
+                    floatButton.setOnClickListener(((GroupFragment) adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
                     floatButton.setImageResource(R.drawable.ic_float_add_group);
-                }else{
+                } else {
                     floatButton.setVisibility(View.GONE);
                 }
             }
@@ -168,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-//    @Override
+    //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
 //        if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {

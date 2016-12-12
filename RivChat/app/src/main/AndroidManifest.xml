@@ -35,11 +35,12 @@
             android:theme="@style/Translucent" />
         <activity
             android:name=".ui.ChatActivity"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"/>
         <activity android:name=".ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar"/>
+        <service android:name=".service.FriendChatService"
+            android:exported="false" />
     </application>
 
 </manifest>
