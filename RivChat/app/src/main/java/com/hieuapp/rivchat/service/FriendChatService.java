@@ -8,10 +8,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,9 +23,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.GroupDB;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.Group;
 import com.hieuapp.rivchat.model.ListFriend;
@@ -43,6 +48,7 @@ public class FriendChatService extends Service {
     public Map<String, Boolean> mapMark;
     public Map<String, Query> mapQuery;
     public Map<String, ChildEventListener> mapChildEventListenerMap;
+    public Map<String, Bitmap> mapBitmap;
     public ArrayList<String> listKey;
     public ListFriend listFriend;
     public ArrayList<Group> listGroup;
@@ -60,8 +66,9 @@ public class FriendChatService extends Service {
         listFriend = FriendDB.getInstance(this).getListFriend();
         listGroup = GroupDB.getInstance(this).getListGroups();
         listKey = new ArrayList<>();
+        mapBitmap = new HashMap<>();
 
-        if(listFriend.getListFriend().size() > 0 || listGroup.size() > 0) {
+        if (listFriend.getListFriend().size() > 0 || listGroup.size() > 0) {
             //Dang ky lang nghe cac room tai day
             for (final Friend friend : listFriend.getListFriend()) {
                 if (!listKey.contains(friend.idRoom)) {
@@ -70,7 +77,17 @@ public class FriendChatService extends Service {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                             if (mapMark.get(friend.idRoom) != null && mapMark.get(friend.idRoom)) {
-                                Toast.makeText(FriendChatService.this, friend.name + ": " + ((HashMap)dataSnapshot.getValue()).get("text"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(FriendChatService.this, friend.name + ": " + ((HashMap)dataSnapshot.getValue()).get("text"), Toast.LENGTH_SHORT).show();
+                                if (mapBitmap.get(friend.idRoom) == null) {
+                                    if (!friend.avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                                        byte[] decodedString = Base64.decode(friend.avata, Base64.DEFAULT);
+                                        mapBitmap.put(friend.idRoom, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                                    } else {
+                                        mapBitmap.put(friend.idRoom, BitmapFactory.decodeResource(getResources(), R.drawable.default_avata));
+                                    }
+                                }
+                                createNotify(friend.name, (String) ((HashMap) dataSnapshot.getValue()).get("text"), friend.idRoom.hashCode(), mapBitmap.get(friend.idRoom), false);
+
                             } else {
                                 mapMark.put(friend.idRoom, true);
                             }
@@ -101,14 +118,17 @@ public class FriendChatService extends Service {
                 mapQuery.get(friend.idRoom).addChildEventListener(mapChildEventListenerMap.get(friend.idRoom));
             }
 
-            for(final Group group: listGroup){
+            for (final Group group : listGroup) {
                 if (!listKey.contains(group.id)) {
                     mapQuery.put(group.id, FirebaseDatabase.getInstance().getReference().child("message/" + group.id).limitToLast(1));
                     mapChildEventListenerMap.put(group.id, new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                             if (mapMark.get(group.id) != null && mapMark.get(group.id)) {
-                                Toast.makeText(FriendChatService.this, group.groupInfo.get("name") + ": " + ((HashMap)dataSnapshot.getValue()).get("text"), Toast.LENGTH_SHORT).show();
+                                if (mapBitmap.get(group.id) == null) {
+                                    mapBitmap.put(group.id, BitmapFactory.decodeResource(getResources(), R.drawable.ic_notify_group));
+                                }
+                                createNotify(group.groupInfo.get("name"), (String) ((HashMap) dataSnapshot.getValue()).get("text"), group.id.hashCode(), mapBitmap.get(group.id) , true);
                             } else {
                                 mapMark.put(group.id, true);
                             }
@@ -139,7 +159,7 @@ public class FriendChatService extends Service {
                 mapQuery.get(group.id).addChildEventListener(mapChildEventListenerMap.get(group.id));
             }
 
-        }else{
+        } else {
             stopSelf();
         }
     }
@@ -148,24 +168,26 @@ public class FriendChatService extends Service {
         mapMark.put(id, false);
     }
 
-    public void createNotify(String title, String content, String url) {
-        Intent activityIntent = new Intent(this, ChatActivity.class);
-        activityIntent.setAction(Intent.ACTION_SEND);
-        activityIntent.setType("text/plain");
-        activityIntent.putExtra(Intent.EXTRA_TEXT, url);
+    public void createNotify(String name, String content, int id, Bitmap icon, boolean isGroup) {
+        Intent activityIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, activityIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder notificationBuilder = new
                 NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.default_avata)
-                .setContentTitle(title)
+                .setLargeIcon(icon)
+                .setContentTitle(name)
                 .setContentText(content)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
+        if (isGroup) {
+            notificationBuilder.setSmallIcon(R.drawable.ic_tab_group);
+        } else {
+            notificationBuilder.setSmallIcon(R.drawable.ic_tab_person);
+        }
         NotificationManager notificationManager =
                 (NotificationManager) this.getSystemService(
                         Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
-        notificationManager.notify(0,
+        notificationManager.cancel(id);
+        notificationManager.notify(id,
                 notificationBuilder.build());
     }
 
@@ -185,11 +207,12 @@ public class FriendChatService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for(String id: listKey){
+        for (String id : listKey) {
             mapQuery.get(id).removeEventListener(mapChildEventListenerMap.get(id));
         }
         mapQuery.clear();
         mapChildEventListenerMap.clear();
+        mapBitmap.clear();
         Log.d(TAG, "OnDestroyService");
     }
 

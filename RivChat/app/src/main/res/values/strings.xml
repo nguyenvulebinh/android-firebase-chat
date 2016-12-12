@@ -3,7 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="login_success">login success</string>
     <string name="login">LOGIN</string>
-    <string name="Username">Username</string>
+    <string name="Username">Email</string>
     <string name="Password">Password</string>
     <string name="forgot_your_password">Forgot your password ?</string>
     <string name="go">GO</string>
