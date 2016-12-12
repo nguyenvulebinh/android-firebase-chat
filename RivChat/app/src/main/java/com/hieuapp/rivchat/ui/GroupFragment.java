@@ -28,6 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
+import com.hieuapp.rivchat.data.GroupDB;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Group;
 import com.hieuapp.rivchat.model.ListFriend;
@@ -62,7 +63,8 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_group, container, false);
-        listGroup = new ArrayList<>();
+
+        listGroup = GroupDB.getInstance(getContext()).getListGroups();
         recyclerListGroups = (RecyclerView) layout.findViewById(R.id.recycleListGroup);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
@@ -71,8 +73,11 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         adapter = new ListGroupsAdapter(getContext(), listGroup);
         recyclerListGroups.setAdapter(adapter);
         onClickFloatButton = new FragGroupClickFloatButton();
-        //Ket noi server hien thi group
-        getListGroup();
+        if(listGroup.size() == 0){
+            //Ket noi server hien thi group
+            mSwipeRefreshLayout.setRefreshing(true);
+            getListGroup();
+        }
         return layout;
     }
 
@@ -119,6 +124,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                         listGroup.get(indexGroup).groupInfo.put("name", (String) mapGroupInfo.get("name"));
                         listGroup.get(indexGroup).groupInfo.put("admin", (String) mapGroupInfo.get("admin"));
                     }
+                    GroupDB.getInstance(getContext()).addGroup(listGroup.get(indexGroup));
                     Log.d("GroupFragment", listGroup.get(indexGroup).id +": " + dataSnapshot.toString());
                     getGroupInfo(indexGroup +1);
                 }
@@ -135,6 +141,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public void onRefresh() {
         listGroup.clear();
         ListGroupsAdapter.listFriend = null;
+        GroupDB.getInstance(getContext()).dropDB();
         getListGroup();
     }
 

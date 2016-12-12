@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
+import com.hieuapp.rivchat.data.GroupDB;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Configuration;
@@ -261,6 +262,7 @@ public class UserProfileFragment extends Fragment {
                     if(config.getLabel().equals(SIGNOUT_LABEL)){
                         FirebaseAuth.getInstance().signOut();
                         FriendDB.getInstance(getContext()).dropDB();
+                        GroupDB.getInstance(getContext()).dropDB();
                         getActivity().finish();
                     }
 

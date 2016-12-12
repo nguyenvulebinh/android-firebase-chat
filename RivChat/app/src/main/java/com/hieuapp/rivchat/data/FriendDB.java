@@ -106,7 +106,7 @@ public final class FriendDB {
     private static class FriendDBHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
         static final int DATABASE_VERSION = 1;
-        static final String DATABASE_NAME = "RivChat.db";
+        static final String DATABASE_NAME = "FriendChat.db";
 
         FriendDBHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
