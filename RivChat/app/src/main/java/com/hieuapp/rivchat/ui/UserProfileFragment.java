@@ -189,7 +189,7 @@ public class UserProfileFragment extends Fragment {
                 SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
                 preferenceHelper.saveUserInfo(myAccount);
                 userDB.child("avata").setValue(imageBase64);
-
+                avatar.setImageDrawable(ImageUtils.roundedImage(context, liteImage));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
