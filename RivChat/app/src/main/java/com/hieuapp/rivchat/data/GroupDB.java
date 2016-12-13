@@ -52,11 +52,33 @@ public class GroupDB {
         }
     }
 
+    public void deleteGroup(String idGroup){
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db.delete(FeedEntry.TABLE_NAME, FeedEntry.COLUMN_GROUP_ID + " = " + idGroup , null);
+    }
+
 
     public void addListGroup(ArrayList<Group> listGroup) {
         for (Group group : listGroup) {
             addGroup(group);
         }
+    }
+
+    public Group getGroup(String id){
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + GroupDB.FeedEntry.TABLE_NAME + " where " + FeedEntry.COLUMN_GROUP_ID +" = " + id, null);
+        Group newGroup = new Group();
+        while (cursor.moveToNext()) {
+            String idGroup = cursor.getString(0);
+            String nameGroup = cursor.getString(1);
+            String admin = cursor.getString(2);
+            String member = cursor.getString(3);
+            newGroup.id = idGroup;
+            newGroup.groupInfo.put("name", nameGroup);
+            newGroup.groupInfo.put("admin", admin);
+            newGroup.member.add(member);
+        }
+        return newGroup;
     }
 
     public ArrayList<Group> getListGroups() {

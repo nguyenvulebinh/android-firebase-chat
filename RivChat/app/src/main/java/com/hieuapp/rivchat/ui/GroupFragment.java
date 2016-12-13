@@ -1,8 +1,12 @@
 package com.hieuapp.rivchat.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,7 +16,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -21,6 +29,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,6 +43,8 @@ import com.hieuapp.rivchat.data.GroupDB;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Group;
 import com.hieuapp.rivchat.model.ListFriend;
+import com.yarolegovich.lovelydialog.LovelyInfoDialog;
+import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +62,12 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private ArrayList<Group> listGroup;
     private ListGroupsAdapter adapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    public static final int CONTEXT_MENU_DELETE = 1;
+    public static final int CONTEXT_MENU_EDIT = 2;
+    public static final int REQUEST_EDIT_GROUP = 0;
+    public static final String CONTEXT_MENU_KEY_INTENT_DATA_POS = "pos";
+
+    LovelyProgressDialog progressDialog;
 
     public GroupFragment() {
         // Required empty public constructor
@@ -73,6 +92,11 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         adapter = new ListGroupsAdapter(getContext(), listGroup);
         recyclerListGroups.setAdapter(adapter);
         onClickFloatButton = new FragGroupClickFloatButton();
+        progressDialog = new LovelyProgressDialog(getContext())
+                .setCancelable(false)
+                .setIcon(R.drawable.ic_dialog_delete_group)
+                .setTitle("Deleting....")
+                .setTopColorRes(R.color.colorAccent);
         if(listGroup.size() == 0){
             //Ket noi server hien thi group
             mSwipeRefreshLayout.setRefreshing(true);
@@ -80,7 +104,6 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         }
         return layout;
     }
-
 
     private void getListGroup(){
         FirebaseDatabase.getInstance().getReference().child("user/"+ StaticConfig.UID+"/group").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -96,14 +119,28 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                         listGroup.add(newGroup);
                     }
                     getGroupInfo(0);
+                }else{
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    adapter.notifyDataSetChanged();
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_EDIT_GROUP && resultCode == Activity.RESULT_OK) {
+            listGroup.clear();
+            ListGroupsAdapter.listFriend = null;
+            GroupDB.getInstance(getContext()).dropDB();
+            getListGroup();
+        }
     }
 
     private void getGroupInfo(final int indexGroup){
@@ -145,6 +182,84 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         getListGroup();
     }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case CONTEXT_MENU_DELETE:
+                int posGroup = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
+                Group group = listGroup.get(posGroup);
+                listGroup.remove(posGroup);
+                if(group != null){
+                    deleteGroup(group, 0);
+                }
+                break;
+            case CONTEXT_MENU_EDIT:
+                int posGroup1 = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
+                Intent intent = new Intent(getContext(), AddGroupActivity.class);
+                intent.putExtra("groupId", listGroup.get(posGroup1).id);
+                startActivityForResult(intent, REQUEST_EDIT_GROUP);
+                break;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+    public void deleteGroup(final Group group, final int index){
+        if(index == group.member.size()){
+            FirebaseDatabase.getInstance().getReference().child("group/"+group.id).removeValue()
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            progressDialog.dismiss();
+                            GroupDB.getInstance(getContext()).deleteGroup(group.id);
+                            listGroup.remove(group);
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(getContext(), "Deleted group", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            new LovelyInfoDialog(getContext())
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_dialog_delete_group)
+                                    .setTitle("False")
+                                    .setMessage("Cannot connect server")
+                                    .setCancelable(false)
+                                    .setConfirmButtonText("Ok")
+                                    .show();
+                        }
+                    })
+                    ;
+        }else{
+            FirebaseDatabase.getInstance().getReference().child("user/"+group.member.get(index)+"/group/"+group.id).removeValue()
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            deleteGroup(group, index + 1);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            new LovelyInfoDialog(getContext())
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_dialog_delete_group)
+                                    .setTitle("False")
+                                    .setMessage("Cannot connect server")
+                                    .setCancelable(false)
+                                    .setConfirmButtonText("Ok")
+                                    .show();
+                        }
+                    })
+            ;
+        }
+
+    }
+
     public class FragGroupClickFloatButton implements View.OnClickListener{
 
         Context context;
@@ -164,6 +279,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<Group> listGroup;
     public static ListFriend listFriend = null;
     private Context context;
+
     public ListGroupsAdapter(Context context,ArrayList<Group> listGroup){
         this.context = context;
         this.listGroup = listGroup;
@@ -185,7 +301,12 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((ItemGroupViewHolder) holder).btnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, "More option", Toast.LENGTH_SHORT).show();
+                if(((String)listGroup.get(position).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                    view.setTag(new Object[]{groupName, position});
+                    view.getParent().showContextMenuForChild(view);
+                }else{
+                    Toast.makeText(context, "You are not admin", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         ((RelativeLayout)((ItemGroupViewHolder) holder).txtGroupName.getParent()).setOnClickListener(new View.OnClickListener() {
@@ -223,13 +344,23 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 }
 
-class ItemGroupViewHolder extends RecyclerView.ViewHolder {
+class ItemGroupViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
     public TextView iconGroup, txtGroupName;
     public ImageButton btnMore;
     public ItemGroupViewHolder(View itemView) {
         super(itemView);
+        itemView.setOnCreateContextMenuListener(this);
         iconGroup = (TextView) itemView.findViewById(R.id.icon_group);
         txtGroupName = (TextView) itemView.findViewById(R.id.txtName);
         btnMore = (ImageButton) itemView.findViewById(R.id.btnMoreAction);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+        menu.setHeaderTitle((String) ((Object[])btnMore.getTag())[0]);
+        Intent data = new Intent();
+        data.putExtra(GroupFragment.CONTEXT_MENU_KEY_INTENT_DATA_POS, (Integer) ((Object[])btnMore.getTag())[1]);
+        menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_EDIT, Menu.NONE, "Edit group").setIntent(data);
+        menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_DELETE, Menu.NONE, "Delete group").setIntent(data);
     }
 }

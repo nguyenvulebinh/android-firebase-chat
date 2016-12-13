@@ -21,6 +21,7 @@
             android:src="@drawable/ic_accept_cr_group" />
 
         <TextView
+            android:id="@+id/txtActionName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create group"
