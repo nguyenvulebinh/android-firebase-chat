@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.service.FriendChatService;
 import com.hieuapp.rivchat.service.ServiceUtils;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 user = firebaseAuth.getCurrentUser();
                 if (user != null) {
+                    StaticConfig.UID = user.getUid();
                 } else {
                     MainActivity.this.finish();
                     // User is signed in

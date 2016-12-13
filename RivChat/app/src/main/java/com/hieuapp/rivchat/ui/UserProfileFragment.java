@@ -81,8 +81,6 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
-        userDB.addListenerForSingleValueEvent(userListener);
     }
 
     private ValueEventListener userListener = new ValueEventListener() {
@@ -116,6 +114,8 @@ public class UserProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
+        userDB.addListenerForSingleValueEvent(userListener);
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info, container, false);
         context = view.getContext();

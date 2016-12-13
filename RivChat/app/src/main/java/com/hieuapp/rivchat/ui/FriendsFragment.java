@@ -415,7 +415,6 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
                 ChatActivity.bitmapAvataFriend = new HashMap<>();
-                ChatActivity.bitmapAvataFriend = new HashMap<>();
                 if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
                     ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
