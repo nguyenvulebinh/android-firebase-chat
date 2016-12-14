@@ -122,6 +122,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public void onRefresh() {
         listFriendID.clear();
         dataListFriend.getListFriend().clear();
+        adapter.notifyDataSetChanged();
         FriendDB.getInstance(getContext()).dropDB();
         getListFriendUId();
     }

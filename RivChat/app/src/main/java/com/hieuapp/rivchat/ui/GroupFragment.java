@@ -179,6 +179,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         listGroup.clear();
         ListGroupsAdapter.listFriend = null;
         GroupDB.getInstance(getContext()).dropDB();
+        adapter.notifyDataSetChanged();
         getListGroup();
     }
 
