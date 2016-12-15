@@ -19,5 +19,8 @@ public class StaticConfig {
     public static String INTENT_KEY_CHAT_AVATA = "friendavata";
     public static String INTENT_KEY_CHAT_ID = "friendid";
     public static String INTENT_KEY_CHAT_ROOM_ID = "roomid";
+    public static long TIME_TO_REFRESH = 10 * 1000;
+    public static long TIME_TO_OFFLINE = 30 * 1000;
+
 
 }

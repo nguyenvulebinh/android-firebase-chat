@@ -17,6 +17,8 @@ public class SharedPreferenceHelper {
     private static String SHARE_KEY_NAME = "name";
     private static String SHARE_KEY_EMAIL = "email";
     private static String SHARE_KEY_AVATA = "avata";
+    private static String SHARE_KEY_UID = "uid";
+
 
     private SharedPreferenceHelper() {}
 
@@ -33,7 +35,7 @@ public class SharedPreferenceHelper {
         editor.putString(SHARE_KEY_NAME, user.name);
         editor.putString(SHARE_KEY_EMAIL, user.email);
         editor.putString(SHARE_KEY_AVATA, user.avata);
-
+        editor.putString(SHARE_KEY_UID, StaticConfig.UID);
         editor.apply();
     }
 
@@ -50,6 +52,8 @@ public class SharedPreferenceHelper {
         return user;
     }
 
-
+    public String getUID(){
+        return preferences.getString(SHARE_KEY_UID, "");
+    }
 
 }

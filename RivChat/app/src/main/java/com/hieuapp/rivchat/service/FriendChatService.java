@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -52,6 +53,7 @@ public class FriendChatService extends Service {
     public ArrayList<String> listKey;
     public ListFriend listFriend;
     public ArrayList<Group> listGroup;
+    public CountDownTimer updateOnline;
 
     public FriendChatService() {
     }
@@ -67,6 +69,18 @@ public class FriendChatService extends Service {
         listGroup = GroupDB.getInstance(this).getListGroups();
         listKey = new ArrayList<>();
         mapBitmap = new HashMap<>();
+        updateOnline = new CountDownTimer(System.currentTimeMillis(), StaticConfig.TIME_TO_REFRESH) {
+            @Override
+            public void onTick(long l) {
+                ServiceUtils.updateUserStatus(getApplicationContext());
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        };
+        updateOnline.start();
 
         if (listFriend.getListFriend().size() > 0 || listGroup.size() > 0) {
             //Dang ky lang nghe cac room tai day
@@ -213,6 +227,7 @@ public class FriendChatService extends Service {
         mapQuery.clear();
         mapChildEventListenerMap.clear();
         mapBitmap.clear();
+        updateOnline.cancel();
         Log.d(TAG, "OnDestroyService");
     }
 

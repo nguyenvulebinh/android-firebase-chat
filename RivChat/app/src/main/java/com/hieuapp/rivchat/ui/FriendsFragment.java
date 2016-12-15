@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -14,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -65,6 +68,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ArrayList<String> listFriendID = null;
     private LovelyProgressDialog dialogFindAllFriend;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CountDownTimer detectFriendOnline;
     public static int ACTION_START_CHAT = 1;
 
     public FriendsFragment() {
@@ -79,7 +83,18 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        detectFriendOnline = new CountDownTimer(System.currentTimeMillis(), StaticConfig.TIME_TO_REFRESH) {
+            @Override
+            public void onTick(long l) {
+                ServiceUtils.updateFriendStatus(getContext(), dataListFriend);
+                ServiceUtils.updateUserStatus(getContext());
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        };
         if (dataListFriend == null) {
             dataListFriend = FriendDB.getInstance(getContext()).getListFriend();
             if (dataListFriend.getListFriend().size() > 0) {
@@ -87,6 +102,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 for (Friend friend : dataListFriend.getListFriend()) {
                     listFriendID.add(friend.id);
                 }
+                detectFriendOnline.start();
             }
         }
         View layout = inflater.inflate(R.layout.fragment_people, container, false);
@@ -113,7 +129,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(ACTION_START_CHAT == requestCode && data != null && ListFriendsAdapter.mapMark != null){
+        if (ACTION_START_CHAT == requestCode && data != null && ListFriendsAdapter.mapMark != null) {
             ListFriendsAdapter.mapMark.put(data.getStringExtra("idFriend"), false);
         }
     }
@@ -124,6 +140,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         dataListFriend.getListFriend().clear();
         adapter.notifyDataSetChanged();
         FriendDB.getInstance(getContext()).dropDB();
+        detectFriendOnline.cancel();
         getListFriendUId();
     }
 
@@ -345,6 +362,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
             adapter.notifyDataSetChanged();
             dialogFindAllFriend.dismiss();
             mSwipeRefreshLayout.setRefreshing(false);
+            detectFriendOnline.start();
         } else {
             final String id = listFriendID.get(index);
             FirebaseDatabase.getInstance().getReference().child("user/" + id).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -378,7 +396,9 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ListFriend listFriend;
     private Context context;
     public static Map<String, Query> mapQuery;
+    public static Map<String, DatabaseReference> mapQueryOnline;
     public static Map<String, ChildEventListener> mapChildListener;
+    public static Map<String, ChildEventListener> mapChildListenerOnline;
     public static Map<String, Boolean> mapMark;
     private FriendsFragment fragment;
 
@@ -388,6 +408,8 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mapQuery = new HashMap<>();
         mapChildListener = new HashMap<>();
         mapMark = new HashMap<>();
+        mapChildListenerOnline = new HashMap<>();
+        mapQueryOnline = new HashMap<>();
         this.fragment = fragment;
     }
 
@@ -436,8 +458,8 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text);
                 ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT);
                 ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT);
-            }else{
-                ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text.substring((id+"").length()));
+            } else {
+                ((ItemFriendViewHolder) holder).txtMessage.setText(listFriend.getListFriend().get(position).message.text.substring((id + "").length()));
                 ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT_BOLD);
                 ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT_BOLD);
             }
@@ -451,22 +473,21 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
             ((ItemFriendViewHolder) holder).txtMessage.setVisibility(View.GONE);
             ((ItemFriendViewHolder) holder).txtTime.setVisibility(View.GONE);
-            final String idFriend = listFriend.getListFriend().get(position).id;
-            if (mapQuery.get(idFriend) == null && mapChildListener.get(idFriend) == null) {
-                mapQuery.put(idFriend, FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1));
-                mapChildListener.put(idFriend, new ChildEventListener() {
+            if (mapQuery.get(id) == null && mapChildListener.get(id) == null) {
+                mapQuery.put(id, FirebaseDatabase.getInstance().getReference().child("message/" + idRoom).limitToLast(1));
+                mapChildListener.put(id, new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         HashMap mapMessage = (HashMap) dataSnapshot.getValue();
-                        if(mapMark.get(idFriend) != null) {
-                            if (!mapMark.get(idFriend)) {
-                                listFriend.getListFriend().get(position).message.text = idFriend + mapMessage.get("text");
+                        if (mapMark.get(id) != null) {
+                            if (!mapMark.get(id)) {
+                                listFriend.getListFriend().get(position).message.text = id + mapMessage.get("text");
                             } else {
                                 listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
                             }
                             notifyDataSetChanged();
-                            mapMark.put(idFriend, false);
-                        }else{
+                            mapMark.put(id, false);
+                        } else {
                             listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
                             notifyDataSetChanged();
                         }
@@ -493,12 +514,12 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                     }
                 });
-                mapQuery.get(idFriend).addChildEventListener(mapChildListener.get(idFriend));
-                mapMark.put(idFriend, true);
+                mapQuery.get(id).addChildEventListener(mapChildListener.get(id));
+                mapMark.put(id, true);
             } else {
-                mapQuery.get(idFriend).removeEventListener(mapChildListener.get(idFriend));
-                mapQuery.get(idFriend).addChildEventListener(mapChildListener.get(idFriend));
-                mapMark.put(idFriend, true);
+                mapQuery.get(id).removeEventListener(mapChildListener.get(id));
+                mapQuery.get(id).addChildEventListener(mapChildListener.get(id));
+                mapMark.put(id, true);
             }
         }
         if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
@@ -510,11 +531,50 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
 
-//        if (listFriend.getListFriend().get(position).status.isOnline) {
-//            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
-//        } else {
-//            ((ItemFriendViewHolder) holder).avata.setBorderWidth(0);
-//        }
+        if (mapQueryOnline.get(id) == null && mapChildListenerOnline.get(id) == null) {
+            mapQueryOnline.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id+"/status"));
+            mapChildListenerOnline.put(id, new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    if(dataSnapshot.getValue() != null && dataSnapshot.getKey().equals("isOnline")) {
+                        Log.d("FriendsFragment add " + id,  (boolean)dataSnapshot.getValue() +"");
+                        listFriend.getListFriend().get(position).status.isOnline = (boolean)dataSnapshot.getValue();
+                        notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    if(dataSnapshot.getValue() != null&& dataSnapshot.getKey().equals("isOnline")) {
+                        Log.d("FriendsFragment change " + id,  (boolean)dataSnapshot.getValue() +"");
+                        listFriend.getListFriend().get(position).status.isOnline = (boolean)dataSnapshot.getValue();
+                        notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            mapQueryOnline.get(id).addChildEventListener(mapChildListenerOnline.get(id));
+        }
+
+        if (listFriend.getListFriend().get(position).status.isOnline) {
+            ((ItemFriendViewHolder) holder).avata.setBorderWidth(10);
+        } else {
+            ((ItemFriendViewHolder) holder).avata.setBorderWidth(0);
+        }
     }
 
     @Override

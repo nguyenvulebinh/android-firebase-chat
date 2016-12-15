@@ -297,7 +297,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String groupName = listGroup.get(position).groupInfo.get("name");
         if(groupName != null && groupName.length() > 0) {
             ((ItemGroupViewHolder) holder).txtGroupName.setText(groupName);
-            ((ItemGroupViewHolder) holder).iconGroup.setText(groupName.charAt(0) + "");
+            ((ItemGroupViewHolder) holder).iconGroup.setText((groupName.charAt(0) + "").toUpperCase());
         }
         ((ItemGroupViewHolder) holder).btnMore.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,9 +5,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hieuapp.rivchat.data.SharedPreferenceHelper;
+import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Friend;
+import com.hieuapp.rivchat.model.ListFriend;
+
+import java.util.HashMap;
 
 /**
  * Created by nguyenbinh on 12/12/2016.
@@ -98,6 +109,49 @@ public class ServiceUtils {
             };
             Intent intent = new Intent(context, FriendChatService.class);
             context.bindService(intent, connectionServiceFriendChatForStart, Context.BIND_NOT_FOREGROUND);
+        }
+    }
+
+    public static void updateUserStatus(Context context){
+        if(isNetworkConnected(context)) {
+            String uid = SharedPreferenceHelper.getInstance(context).getUID();
+            if (!uid.equals("")) {
+                FirebaseDatabase.getInstance().getReference().child("user/" + uid + "/status/isOnline").setValue(true);
+                FirebaseDatabase.getInstance().getReference().child("user/" + uid + "/status/timestamp").setValue(System.currentTimeMillis());
+            }
+        }
+    }
+
+    public static void updateFriendStatus(Context context, ListFriend listFriend){
+        if(isNetworkConnected(context)) {
+            for (Friend friend : listFriend.getListFriend()) {
+                final String fid = friend.id;
+                FirebaseDatabase.getInstance().getReference().child("user/" + fid + "/status").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            HashMap mapStatus = (HashMap) dataSnapshot.getValue();
+                            if ((boolean) mapStatus.get("isOnline") && (System.currentTimeMillis() - (long) mapStatus.get("timestamp")) > StaticConfig.TIME_TO_OFFLINE) {
+                                FirebaseDatabase.getInstance().getReference().child("user/" + fid + "/status/isOnline").setValue(false);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    public static boolean isNetworkConnected(Context context) {
+        try{
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return cm.getActiveNetworkInfo() != null;
+        }catch (Exception e){
+            return true;
         }
     }
 }
