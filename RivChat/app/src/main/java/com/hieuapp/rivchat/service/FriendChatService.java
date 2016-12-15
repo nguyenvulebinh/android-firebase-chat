@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Base64;
@@ -191,6 +192,8 @@ public class FriendChatService extends Service {
                 .setContentTitle(name)
                 .setContentText(content)
                 .setContentIntent(pendingIntent)
+                .setVibrate(new long[] { 1000, 1000})
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setAutoCancel(true);
         if (isGroup) {
             notificationBuilder.setSmallIcon(R.drawable.ic_tab_group);
