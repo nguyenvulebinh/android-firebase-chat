@@ -115,8 +115,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         ServiceUtils.startServiceFriendChat(getApplicationContext());
+        super.onDestroy();
     }
 
     /**

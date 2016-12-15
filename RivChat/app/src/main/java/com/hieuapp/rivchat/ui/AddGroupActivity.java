@@ -353,7 +353,7 @@ class ListPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
         if (isEdit && editGroup.member.contains(id)) {
             ((ItemFriendHolder) holder).checkBox.setChecked(true);
-        }else if(!editGroup.member.contains(id)){
+        }else if(editGroup != null && !editGroup.member.contains(id)){
             ((ItemFriendHolder) holder).checkBox.setChecked(false);
         }
     }

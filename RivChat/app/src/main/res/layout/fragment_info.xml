@@ -19,7 +19,9 @@
                 android:id="@+id/img_avatar"
                 android:layout_gravity="center"
                 android:layout_width="104dp"
-                android:layout_height="104dp" />
+                android:layout_height="104dp"
+                android:src="@drawable/default_avata"
+                android:background="#00000000"/>
             <TextView
                 android:layout_gravity="center"
                 android:textSize="24sp"

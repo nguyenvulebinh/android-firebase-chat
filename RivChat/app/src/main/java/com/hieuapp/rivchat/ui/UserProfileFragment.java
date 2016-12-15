@@ -215,17 +215,20 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void setImageAvatar(Context context, String imgBase64){
-        Resources res = getResources();
-        //Nếu chưa có avatar thì để hình mặc định
-        Bitmap src;
-        if(imgBase64.equals("default")){
-            src = BitmapFactory.decodeResource(res, R.drawable.default_avata);
-        }else {
-            byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
-            src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        }
+        try {
+            Resources res = getResources();
+            //Nếu chưa có avatar thì để hình mặc định
+            Bitmap src;
+            if (imgBase64.equals("default")) {
+                src = BitmapFactory.decodeResource(res, R.drawable.default_avata);
+            } else {
+                byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
+                src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            }
 
-        avatar.setImageDrawable(ImageUtils.roundedImage(context, src));
+            avatar.setImageDrawable(ImageUtils.roundedImage(context, src));
+        }catch (Exception e){
+        }
     }
 
     @Override

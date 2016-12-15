@@ -32,6 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.StaticConfig;

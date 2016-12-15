@@ -41,7 +41,8 @@
         <activity android:name=".ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar"/>
         <service android:name=".service.FriendChatService"
-            android:exported="false" />
+            android:exported="false"
+            android:persistent= "true" />
     </application>
 
 </manifest>
