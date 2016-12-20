@@ -15,23 +15,13 @@
         android:focusableInTouchMode="true"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <EditText
-            android:id="@+id/edit_link"
+        <android.support.v7.widget.Toolbar
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/edittext_boder"
-            android:drawableLeft="@drawable/ic_search"
-            android:drawablePadding="20dp"
-            android:hint="Search for people and group"
-            android:inputType="textLongMessage"
-            android:maxLines="1"
-            android:paddingLeft="7dp"
-            android:paddingRight="7dp"
-            android:textColorHint="#aeafaf"
-            android:textSize="15sp"/>
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:id="@+id/toolbar" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"

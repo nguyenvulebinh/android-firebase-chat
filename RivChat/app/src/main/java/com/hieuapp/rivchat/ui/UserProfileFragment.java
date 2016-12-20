@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -24,24 +25,25 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.hieuapp.rivchat.MainActivity;
 import com.hieuapp.rivchat.R;
 import com.hieuapp.rivchat.data.FriendDB;
 import com.hieuapp.rivchat.data.GroupDB;
 import com.hieuapp.rivchat.data.SharedPreferenceHelper;
 import com.hieuapp.rivchat.data.StaticConfig;
 import com.hieuapp.rivchat.model.Configuration;
-import com.hieuapp.rivchat.model.Friend;
 import com.hieuapp.rivchat.model.User;
-import com.hieuapp.rivchat.service.FriendChatService;
 import com.hieuapp.rivchat.service.ServiceUtils;
 import com.hieuapp.rivchat.util.ImageUtils;
+import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -67,10 +69,12 @@ public class UserProfileFragment extends Fragment {
     private static final String USERNAME_LABEL = "Username";
     private static final String EMAIL_LABEL = "Email";
     private static final String SIGNOUT_LABEL = "Sign out";
+    private static final String RESETPASS_LABEL = "Reset Password";
 
     private static final int PICK_IMAGE = 1994;
 
     private DatabaseReference userDB;
+    private FirebaseAuth mAuth;
     private User myAccount;
     private Context context;
 
@@ -90,7 +94,7 @@ public class UserProfileFragment extends Fragment {
             listConfig.clear();
             myAccount = dataSnapshot.getValue(User.class);
 
-            updateArrayListInfo(myAccount);
+            setupArrayListInfo(myAccount);
             if(infoAdapter != null){
                 infoAdapter.notifyDataSetChanged();
             }
@@ -116,6 +120,8 @@ public class UserProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
         userDB.addListenerForSingleValueEvent(userListener);
+        mAuth = FirebaseAuth.getInstance();
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info, container, false);
         context = view.getContext();
@@ -125,7 +131,7 @@ public class UserProfileFragment extends Fragment {
 
         SharedPreferenceHelper prefHelper = SharedPreferenceHelper.getInstance(context);
         myAccount = prefHelper.getUserInfo();
-        updateArrayListInfo(myAccount);
+        setupArrayListInfo(myAccount);
         setImageAvatar(context, myAccount.avata);
         tvUserName.setText(myAccount.name);
 
@@ -147,7 +153,7 @@ public class UserProfileFragment extends Fragment {
 
             new AlertDialog.Builder(context)
                     .setTitle("Avatar")
-                    .setMessage("Are you sure change avatar profile?")
+                    .setMessage("Are you sure want to change avatar profile?")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -202,13 +208,16 @@ public class UserProfileFragment extends Fragment {
      * Xóa list cũ và cập nhật lại list data mới
      * @param myAccount
      */
-    public void updateArrayListInfo(User myAccount){
+    public void setupArrayListInfo(User myAccount){
         listConfig.clear();
         Configuration userNameConfig = new Configuration(USERNAME_LABEL, myAccount.name, R.mipmap.ic_account_box);
         listConfig.add(userNameConfig);
 
         Configuration emailConfig = new Configuration(EMAIL_LABEL, myAccount.email, R.mipmap.ic_email);
         listConfig.add(emailConfig);
+
+        Configuration resetPass = new Configuration(RESETPASS_LABEL, "", R.mipmap.ic_restore);
+        listConfig.add(resetPass);
 
         Configuration signout = new Configuration(SIGNOUT_LABEL, "", R.mipmap.ic_power_settings);
         listConfig.add(signout);
@@ -298,6 +307,25 @@ public class UserProfileFragment extends Fragment {
                                     }
                                 }).show();
                     }
+
+                    if(config.getLabel().equals(RESETPASS_LABEL)){
+                        new AlertDialog.Builder(context)
+                                .setTitle("Password")
+                                .setMessage("Are you sure want to reset password?")
+                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        resetPassword(myAccount.email);
+                                        dialogInterface.dismiss();
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.dismiss();
+                                    }
+                                }).show();
+                    }
                 }
             });
         }
@@ -314,7 +342,57 @@ public class UserProfileFragment extends Fragment {
             prefHelper.saveUserInfo(myAccount);
 
             tvUserName.setText(newName);
-            updateArrayListInfo(myAccount);
+            setupArrayListInfo(myAccount);
+        }
+
+        void resetPassword(final String email) {
+            mAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            new LovelyInfoDialog(context) {
+                                @Override
+                                public LovelyInfoDialog setConfirmButtonText(String text) {
+                                    findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            dismiss();
+                                        }
+                                    });
+                                    return super.setConfirmButtonText(text);
+                                }
+                            }
+                                    .setTopColorRes(R.color.colorPrimary)
+                                    .setIcon(R.drawable.ic_pass_reset)
+                                    .setTitle("Password Recovery")
+                                    .setMessage("Sent email to " + email)
+                                    .setConfirmButtonText("Ok")
+                                    .show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            new LovelyInfoDialog(context) {
+                                @Override
+                                public LovelyInfoDialog setConfirmButtonText(String text) {
+                                    findView(com.yarolegovich.lovelydialog.R.id.ld_btn_confirm).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            dismiss();
+                                        }
+                                    });
+                                    return super.setConfirmButtonText(text);
+                                }
+                            }
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setIcon(R.drawable.ic_pass_reset)
+                                    .setTitle("False")
+                                    .setMessage("False to sent email to " + email)
+                                    .setConfirmButtonText("Ok")
+                                    .show();
+                        }
+                    });
         }
 
         @Override

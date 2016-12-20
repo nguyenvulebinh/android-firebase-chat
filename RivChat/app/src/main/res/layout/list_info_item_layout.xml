@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="16dp"
-    android:id="@+id/recycler_view"
+    android:id="@+id/config_item"
     android:layout_width="match_parent"
     android:background="@android:color/background_light"
     android:layout_height="72dp"
