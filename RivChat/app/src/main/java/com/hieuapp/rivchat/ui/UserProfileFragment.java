@@ -225,6 +225,7 @@ public class UserProfileFragment extends Fragment {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                waitingDialog.dismiss();
                                 Log.d("Update Avatar", "failed");
                                 new LovelyInfoDialog(context)
                                         .setTopColorRes(R.color.colorAccent)
