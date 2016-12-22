@@ -13,8 +13,8 @@ android {
     compileSdkVersion 24
     buildToolsVersion "25.0.0"
     defaultConfig {
-        applicationId "com.hieuapp.rivchat"
-        minSdkVersion 19
+        applicationId 'com.hieuapp.rivchat'
+        minSdkVersion 21
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -29,6 +29,8 @@ android {
         debug {
             signingConfig signingConfigs.config
         }
+    }
+    productFlavors {
     }
 }
 

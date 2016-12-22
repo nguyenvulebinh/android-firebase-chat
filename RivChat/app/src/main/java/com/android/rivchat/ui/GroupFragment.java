@@ -52,10 +52,11 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private SwipeRefreshLayout mSwipeRefreshLayout;
     public static final int CONTEXT_MENU_DELETE = 1;
     public static final int CONTEXT_MENU_EDIT = 2;
+    public static final int CONTEXT_MENU_LEAVE = 3;
     public static final int REQUEST_EDIT_GROUP = 0;
     public static final String CONTEXT_MENU_KEY_INTENT_DATA_POS = "pos";
 
-    LovelyProgressDialog progressDialog;
+    LovelyProgressDialog progressDialog, waitingLeavingGroup;
 
     public GroupFragment() {
         // Required empty public constructor
@@ -85,6 +86,13 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 .setIcon(R.drawable.ic_dialog_delete_group)
                 .setTitle("Deleting....")
                 .setTopColorRes(R.color.colorAccent);
+
+        waitingLeavingGroup = new LovelyProgressDialog(getContext())
+                .setCancelable(false)
+                .setIcon(R.drawable.ic_dialog_delete_group)
+                .setTitle("Group leaving....")
+                .setTopColorRes(R.color.colorAccent);
+
         if(listGroup.size() == 0){
             //Ket noi server hien thi group
             mSwipeRefreshLayout.setRefreshing(true);
@@ -177,17 +185,33 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         switch (item.getItemId()) {
             case CONTEXT_MENU_DELETE:
                 int posGroup = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                Group group = listGroup.get(posGroup);
-                listGroup.remove(posGroup);
-                if(group != null){
-                    deleteGroup(group, 0);
+                if(((String)listGroup.get(posGroup).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                    Group group = listGroup.get(posGroup);
+                    listGroup.remove(posGroup);
+                    if(group != null){
+                        deleteGroup(group, 0);
+                    }
+                }else{
+                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case CONTEXT_MENU_EDIT:
                 int posGroup1 = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                Intent intent = new Intent(getContext(), AddGroupActivity.class);
-                intent.putExtra("groupId", listGroup.get(posGroup1).id);
-                startActivityForResult(intent, REQUEST_EDIT_GROUP);
+                if(((String)listGroup.get(posGroup1).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                    Intent intent = new Intent(getContext(), AddGroupActivity.class);
+                    intent.putExtra("groupId", listGroup.get(posGroup1).id);
+                    startActivityForResult(intent, REQUEST_EDIT_GROUP);
+                }else{
+                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+
+            case CONTEXT_MENU_LEAVE:
+                int position = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
+                waitingLeavingGroup.show();
+                Group groupLeaving = listGroup.get(position);
+                leaveGroup(groupLeaving);
                 break;
         }
 
@@ -249,6 +273,70 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     }
 
+    public void leaveGroup(final Group group){
+        FirebaseDatabase.getInstance().getReference().child("group/"+group.id+"/member")
+                .orderByValue().equalTo(StaticConfig.UID)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot.getValue() == null) {
+                            //email not found
+                            waitingLeavingGroup.dismiss();
+                            new LovelyInfoDialog(getContext())
+                                    .setTopColorRes(R.color.colorAccent)
+                                    .setTitle("Error")
+                                    .setMessage("Error occurred during leaving group")
+                                    .show();
+                        } else {
+                            String memberIndex = ((HashMap) dataSnapshot.getValue()).keySet().iterator().next().toString();
+                            FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID)
+                                    .child("group").child(group.id).removeValue();
+                            FirebaseDatabase.getInstance().getReference().child("group/"+group.id+"/member")
+                                    .child(memberIndex).removeValue()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            waitingLeavingGroup.dismiss();
+
+                                            listGroup.remove(group);
+                                            adapter.notifyDataSetChanged();
+                                            GroupDB.getInstance(getContext()).deleteGroup(group.id);
+                                            new LovelyInfoDialog(getContext())
+                                                    .setTopColorRes(R.color.colorAccent)
+                                                    .setTitle("Success")
+                                                    .setMessage("Group leaving successfully")
+                                                    .show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            waitingLeavingGroup.dismiss();
+                                            new LovelyInfoDialog(getContext())
+                                                    .setTopColorRes(R.color.colorAccent)
+                                                    .setTitle("Error")
+                                                    .setMessage("Error occurred during leaving group")
+                                                    .show();
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //email not found
+                        waitingLeavingGroup.dismiss();
+                        new LovelyInfoDialog(getContext())
+                                .setTopColorRes(R.color.colorAccent)
+                                .setTitle("Error")
+                                .setMessage("Error occurred during leaving group")
+                                .show();
+                    }
+                });
+
+    }
+
     public class FragGroupClickFloatButton implements View.OnClickListener{
 
         Context context;
@@ -290,12 +378,8 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((ItemGroupViewHolder) holder).btnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(((String)listGroup.get(position).groupInfo.get("admin")).equals(StaticConfig.UID)) {
-                    view.setTag(new Object[]{groupName, position});
-                    view.getParent().showContextMenuForChild(view);
-                }else{
-                    Toast.makeText(context, "You are not admin", Toast.LENGTH_SHORT).show();
-                }
+                view.setTag(new Object[]{groupName, position});
+                view.getParent().showContextMenuForChild(view);
             }
         });
         ((RelativeLayout)((ItemGroupViewHolder) holder).txtGroupName.getParent()).setOnClickListener(new View.OnClickListener() {
@@ -351,5 +435,6 @@ class ItemGroupViewHolder extends RecyclerView.ViewHolder implements View.OnCrea
         data.putExtra(GroupFragment.CONTEXT_MENU_KEY_INTENT_DATA_POS, (Integer) ((Object[])btnMore.getTag())[1]);
         menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_EDIT, Menu.NONE, "Edit group").setIntent(data);
         menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_DELETE, Menu.NONE, "Delete group").setIntent(data);
+        menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_LEAVE, Menu.NONE, "Leave group").setIntent(data);
     }
 }
