@@ -192,7 +192,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                         deleteGroup(group, 0);
                     }
                 }else{
-                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_LONG).show();
                 }
                 break;
             case CONTEXT_MENU_EDIT:
@@ -202,16 +202,20 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                     intent.putExtra("groupId", listGroup.get(posGroup1).id);
                     startActivityForResult(intent, REQUEST_EDIT_GROUP);
                 }else{
-                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_LONG).show();
                 }
 
                 break;
 
             case CONTEXT_MENU_LEAVE:
                 int position = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                waitingLeavingGroup.show();
-                Group groupLeaving = listGroup.get(position);
-                leaveGroup(groupLeaving);
+                if(((String)listGroup.get(position).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                    Toast.makeText(getActivity(), "Admin cannot leave group", Toast.LENGTH_LONG).show();
+                }else{
+                    waitingLeavingGroup.show();
+                    Group groupLeaving = listGroup.get(position);
+                    leaveGroup(groupLeaving);
+                }
                 break;
         }
 
