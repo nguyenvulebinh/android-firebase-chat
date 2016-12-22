@@ -44,6 +44,7 @@ import com.hieuapp.rivchat.model.User;
 import com.hieuapp.rivchat.service.ServiceUtils;
 import com.hieuapp.rivchat.util.ImageUtils;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
+import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -72,6 +73,7 @@ public class UserProfileFragment extends Fragment {
     private static final String RESETPASS_LABEL = "Change Password";
 
     private static final int PICK_IMAGE = 1994;
+    private LovelyProgressDialog waitingDialog;
 
     private DatabaseReference userDB;
     private FirebaseAuth mAuth;
@@ -141,6 +143,8 @@ public class UserProfileFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(infoAdapter);
+
+        waitingDialog = new LovelyProgressDialog(context);
         return view;
     }
 
@@ -187,17 +191,48 @@ public class UserProfileFragment extends Fragment {
                 Bitmap imgBitmap = BitmapFactory.decodeStream(inputStream);
                 imgBitmap = ImageUtils.cropToSquare(imgBitmap);
                 InputStream is = ImageUtils.convertBitmapToInputStream(imgBitmap);
-                Bitmap liteImage = ImageUtils.makeImageLite(is,
+                final Bitmap liteImage = ImageUtils.makeImageLite(is,
                         imgBitmap.getWidth(), imgBitmap.getHeight(),
                         ImageUtils.AVATAR_WIDTH, ImageUtils.AVATAR_HEIGHT);
 
                 String imageBase64 = ImageUtils.encodeBase64(liteImage);
-
                 myAccount.avata = imageBase64;
-                SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
-                preferenceHelper.saveUserInfo(myAccount);
-                userDB.child("avata").setValue(imageBase64);
-                avatar.setImageDrawable(ImageUtils.roundedImage(context, liteImage));
+
+                waitingDialog.setCancelable(false)
+                        .setTitle("Avatar updating....")
+                        .setTopColorRes(R.color.colorPrimary)
+                        .show();
+
+                userDB.child("avata").setValue(imageBase64)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+
+                                    waitingDialog.dismiss();
+                                    SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
+                                    preferenceHelper.saveUserInfo(myAccount);
+                                    avatar.setImageDrawable(ImageUtils.roundedImage(context, liteImage));
+
+                                    new LovelyInfoDialog(context)
+                                            .setTopColorRes(R.color.colorPrimary)
+                                            .setTitle("Success")
+                                            .setMessage("Update avatar successfully!")
+                                            .show();
+                                }
+                            }
+                         })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d("Update Avatar", "failed");
+                                new LovelyInfoDialog(context)
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setTitle("False")
+                                        .setMessage("False to update avatar")
+                                        .show();
+                            }
+                        });
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }

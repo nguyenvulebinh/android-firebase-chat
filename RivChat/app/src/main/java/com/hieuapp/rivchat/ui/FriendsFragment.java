@@ -2,6 +2,7 @@ package com.hieuapp.rivchat.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -251,11 +253,12 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
             //Check xem da ton tai id trong danh sach id chua
             if (listFriendID.contains(idFriend)) {
+                dialogWait.dismiss();
                 new LovelyInfoDialog(context)
                         .setTopColorRes(R.color.colorPrimary)
                         .setIcon(R.drawable.ic_add_friend)
-                        .setTitle("Success")
-                        .setMessage("Add friend success")
+                        .setTitle("Friend")
+                        .setMessage("User "+userInfo.email + " has been friend")
                         .show();
             } else {
                 addFriend(idFriend, true);
@@ -274,14 +277,15 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         private void addFriend(final String idFriend, boolean isIdFriend) {
             if (idFriend != null) {
                 if (isIdFriend) {
-                    FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                addFriend(idFriend, false);
-                            }
-                        }
-                    })
+                    FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        addFriend(idFriend, false);
+                                    }
+                                }
+                            })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
@@ -316,6 +320,44 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 }
                             });
                 }
+            } else {
+                dialogWait.dismiss();
+                new LovelyInfoDialog(context)
+                        .setTopColorRes(R.color.colorPrimary)
+                        .setIcon(R.drawable.ic_add_friend)
+                        .setTitle("Success")
+                        .setMessage("Add friend success")
+                        .show();
+            }
+        }
+
+        /**
+         * Delete friend
+         *
+         * @param idFriend
+         */
+        private void deleteFriend(final String idFriend) {
+            if (idFriend != null) {
+                FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            addFriend(null, false);
+                        }
+                    }
+                })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                dialogWait.dismiss();
+                                new LovelyInfoDialog(context)
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("False")
+                                        .setMessage("False to add friend success")
+                                        .show();
+                            }
+                        });
             } else {
                 dialogWait.dismiss();
                 new LovelyInfoDialog(context)
@@ -417,7 +459,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.rc_item_friend, parent, false);
-        return new ItemFriendViewHolder(view);
+        return new ItemFriendViewHolder(context, view);
     }
 
     @Override
@@ -584,16 +626,44 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 }
 
-class ItemFriendViewHolder extends RecyclerView.ViewHolder {
+class ItemFriendViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
     public CircleImageView avata;
     public TextView txtName, txtTime, txtMessage;
+    private Context context;
 
-    ItemFriendViewHolder(View itemView) {
+    ItemFriendViewHolder(Context context, View itemView) {
         super(itemView);
         avata = (CircleImageView) itemView.findViewById(R.id.icon_avata);
         txtName = (TextView) itemView.findViewById(R.id.txtName);
         txtTime = (TextView) itemView.findViewById(R.id.txtTime);
         txtMessage = (TextView) itemView.findViewById(R.id.txtMessage);
+        this.context = context;
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        ItemFriendViewHolder viewHolder = (ItemFriendViewHolder)view.getTag();
+        String friendName = (String)viewHolder.txtName.getText();
+        final int position = viewHolder.getLayoutPosition();
+
+        new AlertDialog.Builder(context)
+                .setTitle("Delete Friend")
+                .setMessage("Are you sure want to delete "+friendName+ "?")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(context, "position = "+position, Toast.LENGTH_LONG).show();
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }).show();
+
+        return true;
     }
 }
 
