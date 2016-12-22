@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hieuapp.rivchat">
+    package="com.android.rivchat">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -13,13 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="com.android.rivchat.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name=".ui.LoginActivity"
+            android:name="com.android.rivchat.ui.LoginActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/TranslucentBackground">
@@ -30,17 +30,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.RegisterActivity"
+            android:name="com.android.rivchat.ui.RegisterActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Translucent" />
         <activity
-            android:name=".ui.ChatActivity"
+            android:name="com.android.rivchat.ui.ChatActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity"/>
-        <activity android:name=".ui.AddGroupActivity"
+            android:parentActivityName="com.android.rivchat.MainActivity"/>
+        <activity android:name="com.android.rivchat.ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar"/>
-        <service android:name=".service.FriendChatService"
+        <service android:name="com.android.rivchat.service.FriendChatService"
             android:exported="false"
             android:persistent= "true" />
     </application>
