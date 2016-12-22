@@ -293,7 +293,14 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     .setMessage("Error occurred during leaving group")
                                     .show();
                         } else {
-                            String memberIndex = ((HashMap) dataSnapshot.getValue()).keySet().iterator().next().toString();
+                            String memberIndex = "";
+                            ArrayList<String> result = ((ArrayList<String>)dataSnapshot.getValue());
+                            for(int i = 0; i < result.size(); i++){
+                                if(result.get(i) != null){
+                                    memberIndex = String.valueOf(i);
+                                }
+                            }
+
                             FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID)
                                     .child("group").child(group.id).removeValue();
                             FirebaseDatabase.getInstance().getReference().child("group/"+group.id+"/member")
