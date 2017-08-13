@@ -15,6 +15,8 @@ RivChat is a example for chat app base on Google Firebase, messages are delivere
 **3. Notification**  
 * Push notification on status bar when has new message.  
 
+### Create firebase console  
+* Following step by step in this link https://firebase.google.com/docs/android/setup
 ### ScreenShots
 
 ![Screenshot](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png) 
