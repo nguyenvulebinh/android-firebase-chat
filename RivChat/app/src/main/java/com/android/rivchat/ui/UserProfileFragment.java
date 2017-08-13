@@ -52,11 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
-/**
- * Firebase: bhrivchat@gmail.com
- * Mk 123456a@
- */
 public class UserProfileFragment extends Fragment {
     TextView tvUserName;
     ImageView avatar;
