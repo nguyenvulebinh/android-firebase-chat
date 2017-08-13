@@ -16,9 +16,10 @@ RivChat is a example for chat app base on Google Firebase, messages are delivere
 * Push notification on status bar when has new message.  
 
 ### ScreenShots
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png' width='300'/> 
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-33.png' width='300'/> 
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png' width='300'/> 
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-45.png' width='300'/> 
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-21-54.png' width='300'/> 
-<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-30-44.png' width='300'/> 
+
+![Screenshot](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png) 
+![screenshot2](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-33.png)
+![screenshot3](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png)
+![screenshot4](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-45.png)
+![screenshot5](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-21-54.png)
+![screenshot6](https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-30-44.png) 
