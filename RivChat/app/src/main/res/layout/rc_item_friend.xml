@@ -24,7 +24,7 @@
             android:layout_height="50dp"
             android:layout_margin="10dp"
             android:layout_weight="1"
-            app:civ_border_color="#0084ff"/>
+            app:civ_border_color="@color/colorPrimary"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -53,8 +53,9 @@
                     android:id="@+id/txtTime"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
+                    android:layout_weight="1.5"
+                    android:gravity="center_vertical|right"
+                    android:paddingRight="10dp"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
 

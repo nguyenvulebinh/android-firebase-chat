@@ -1,27 +1,26 @@
 # RivChat - Android chat app base on Firebase.  
-### Tính năng  
-**1. Quản lý tài khoản**  
-* Đăng ký: Cho phép user đăng ký tài khoản bằng email và password
-* Đăng nhập: user phải đăng nhập mới được sử dụng app
-* Quên mật khẩu: Chọn reset mật khẩu thì server sẽ gửi 1 mật khẩu mới (random 8 số) về email đã đăng ký.
-* Sửa thông tin tài khoản: Cho phép đổi username, ảnh đại diện
+RivChat is a example for chat app base on Google Firebase, messages are delivered in real-time.  
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png' width='300'/> 
+### Feature  
+**1. Signin, signout, register.**  
+* Register: allow user register a new account with username and password
+* Signin: user must signin with username and password to use app.
+* Forgot password: connect to Firebase service to reset password.
+* Edit profile: change avatar image, edit username.
 
-**2. Chat, chat nhóm**  
-Giao diện chính khi vào app là 1 activity gồm 2 tab: Bạn bè, nhóm  
-<img src='https://github.com/HieuApp/android-firebase-chat/blob/master/rivchat.png' width='300'/>  
-Hình 1. Giao diện chính của app chat
-* Bạn bè: danh sách dạng list có avatar, tên, text chat cuối cùng (nếu đã từng chat). Cho phép thêm bạn, xóa bạn
-* Nhóm: danh sách dạng list, tên nhóm, avatar là chữ cái đầu của tên nhóm.
-	- Khi bấm vào 1 item(bạn bè hoặc nhóm) thì mở ra màn hình chat.
-	- Thành viên có thể rời khỏi nhóm
-	- Admin(người tạo nhóm): kích thành viên khỏi nhóm, xóa nhóm, thêm thành viên  
-<img src='https://github.com/HieuApp/android-firebase-chat/blob/master/ql-nhom.jpg' width='300'/>  
-Hình 2. popup quản lý thành viên nhóm.  
+**2. Chat, group chat**  
+* Chat with friend: add friend, unfriend, send text message.
+* Chat in group: create group, add member, kickoff member, delete group and rename.  
 
 **3. Notification**  
-* Hiển thị notification trên statusbar khi có tin nhắn mới
-* Tin nhắn chưa đọc bôi đậm  
+* Push notification on status bar when has new message.  
 
-### Yêu cầu  
-* PTTK HT: Usecase, Biểu đồ trình tự, hoạt động, biểu đồ lớp. 
-
+### Create firebase console  
+* Following step by step in this link https://firebase.google.com/docs/android/setup
+### ScreenShots
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png' width='300'/> 
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-33.png' width='300'/> 
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png' width='300'/> 
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-45.png' width='300'/> 
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-21-54.png' width='300'/> 
+<img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-30-44.png' width='300'/> 

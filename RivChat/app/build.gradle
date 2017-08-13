@@ -5,15 +5,14 @@ android {
         config {
             keyAlias 'bhrivchat'
             keyPassword '123456a@'
-//            storeFile file('/home/nguyenbinh/Programming/Android/AndroidStudioWorkSpace/PetProject/android-firebase-chat/bhrivchat.jks')
-            storeFile file('/home/hieuapp/AndroidStudioProjects/android-firebase-chat/bhrivchat.jks')
+            storeFile file('../bhrivchat.jks')
             storePassword '123456a@'
         }
     }
     compileSdkVersion 24
     buildToolsVersion "25.0.0"
     defaultConfig {
-        applicationId "com.hieuapp.rivchat"
+        applicationId 'com.hieuapp.rivchat'
         minSdkVersion 21
         targetSdkVersion 24
         versionCode 1
@@ -29,6 +28,8 @@ android {
         debug {
             signingConfig signingConfigs.config
         }
+    }
+    productFlavors {
     }
 }
 
