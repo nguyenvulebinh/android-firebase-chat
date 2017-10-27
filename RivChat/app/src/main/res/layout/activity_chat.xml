@@ -40,6 +40,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
+        android:hint="Type a message"
         android:layout_toStartOf="@id/btnSend"
         android:background="@drawable/edittext_boder"
         android:drawablePadding="20dp"
