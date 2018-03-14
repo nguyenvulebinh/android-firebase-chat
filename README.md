@@ -1,6 +1,15 @@
 # RivChat - Android chat app base on Firebase.  
 RivChat is a example for chat app base on Google Firebase, messages are delivered in real-time.  
+
+<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" width="200"/> [HaloMe Messenger][1].
+
+HaloMe Messenger is implemented from RivChat. Let checkout it on Play Store
+
+<img src="https://lh3.googleusercontent.com/IfX-sQdKV2f_cyhYTgaqDKNJjYk1UZkzFPFmf6SK-rNOuGExl1qoDuEr_0i5hwrmo24=w200-rw" width="200"/>
+
+### RivChat
 <img src='https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png' width='300'/> 
+
 ### Feature  
 **1. Signin, signout, register.**  
 * Register: allow user register a new account with username and password
@@ -22,3 +31,5 @@ RivChat is a example for chat app base on Google Firebase, messages are delivere
 <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-33.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png" width="250"/> 
 
 <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-45.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-21-54.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-30-44.png" width="250"/>
+
+[1]: https://play.google.com/store/apps/details?id=com.halotalk.app&hl=en
