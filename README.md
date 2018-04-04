@@ -25,7 +25,9 @@ HaloMe Messenger is implemented from RivChat. Let checkout it on Play Store
 * Push notification on status bar when has new message.  
 
 ### Create firebase console  
-* Following step by step in this link https://firebase.google.com/docs/android/setup
+* Following step by step in this link https://firebase.google.com/docs/android/setup  
+* Get full whitepaper "How to build advanced chat app with Firebase": https://goo.gl/forms/W5AOplhfVVwlfyFJ3
+
 ### ScreenShots
 
 <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-13-10.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-15-33.png" width="250"/> <img src="https://github.com/nguyenvulebinh/rivchat/blob/master/Screenshot_2017-01-06-09-22-10.png" width="250"/> 
