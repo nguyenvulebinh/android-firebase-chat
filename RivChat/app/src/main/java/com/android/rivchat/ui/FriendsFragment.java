@@ -545,6 +545,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 mapChildListener.put(id, new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                      if (listFriend.getListFriend().size() > 0) {   
                         HashMap mapMessage = (HashMap) dataSnapshot.getValue();
                         if (mapMark.get(id) != null) {
                             if (!mapMark.get(id)) {
@@ -559,7 +560,8 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             notifyDataSetChanged();
                         }
                         listFriend.getListFriend().get(position).message.timestamp = (long) mapMessage.get("timestamp");
-                    }
+                      } 
+                   }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -614,7 +616,9 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                     if(dataSnapshot.getValue() != null&& dataSnapshot.getKey().equals("isOnline")) {
                         Log.d("FriendsFragment change " + id,  (boolean)dataSnapshot.getValue() +"");
-                        listFriend.getListFriend().get(position).status.isOnline = (boolean)dataSnapshot.getValue();
+                        if (listFriend.getListFriend().size() > 0) {
+                            listFriend.getListFriend().get(position).status.isOnline = (boolean) dataSnapshot.getValue();
+                        }
                         notifyDataSetChanged();
                     }
                 }

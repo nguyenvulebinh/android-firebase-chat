@@ -42,11 +42,19 @@ public class RegisterActivity extends AppCompatActivity {
         editTextRepeatPassword = (EditText) findViewById(R.id.et_repeatpassword);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ShowEnterAnimation();
+        } else {
+            cvAdd.setVisibility(View.VISIBLE);
         }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                animateRevealClose();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    animateRevealClose();
+                } else {
+                    cvAdd.setVisibility(View.INVISIBLE);
+                    fab.setImageResource(R.drawable.ic_signup);
+                    RegisterActivity.super.onBackPressed();
+                }
             }
         });
     }
