@@ -45,8 +45,8 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
-                android:paddingEnd="30dp"
-                android:paddingStart="50dp">
+                android:paddingEnd="28dp"
+                android:paddingStart="51dp">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -60,7 +60,7 @@
                         android:background="@drawable/selector_bg_edit"
                         android:hint="@string/Username"
                         android:inputType="textEmailAddress"
-                        android:paddingBottom="2dp"
+                        android:paddingBottom="3dp"
                         android:textColor="#2fa881"
                         android:textCursorDrawable="@drawable/bg_input_cursor"
                         android:textSize="13sp" />
@@ -71,8 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:orientation="horizontal"
-                android:paddingEnd="30dp"
-                android:paddingStart="50dp">
+                android:paddingEnd="28dp"
+                android:paddingStart="51dp">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
