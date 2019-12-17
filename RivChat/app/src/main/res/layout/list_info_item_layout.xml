@@ -11,7 +11,7 @@
     android:background="@android:color/background_light"
     android:layout_height="72dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.android.rivchat.MainActivity"
+    tools:context="com.android.razgovor.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <ImageView

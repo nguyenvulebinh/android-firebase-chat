@@ -1,4 +1,4 @@
-package com.android.rivchat.model;
+package com.android.razgovor.model;
 
 
 

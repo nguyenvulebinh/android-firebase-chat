@@ -1,4 +1,4 @@
-package com.android.rivchat.data;
+package com.android.razgovor.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import com.android.rivchat.model.Group;
+import com.android.razgovor.model.Group;
 
 import java.util.ArrayList;
 import java.util.HashMap;

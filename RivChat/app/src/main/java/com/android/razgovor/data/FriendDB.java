@@ -1,4 +1,4 @@
-package com.android.rivchat.data;
+package com.android.razgovor.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import com.android.rivchat.model.Friend;
-import com.android.rivchat.model.ListFriend;
+import com.android.razgovor.model.Friend;
+import com.android.razgovor.model.ListFriend;
 
 public final class FriendDB {
     private static FriendDBHelper mDbHelper = null;

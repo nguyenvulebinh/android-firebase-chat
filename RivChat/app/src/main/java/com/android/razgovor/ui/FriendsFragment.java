@@ -1,4 +1,4 @@
-package com.android.rivchat.ui;
+package com.android.razgovor.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,12 +34,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.android.rivchat.R;
-import com.android.rivchat.data.FriendDB;
-import com.android.rivchat.data.StaticConfig;
-import com.android.rivchat.model.Friend;
-import com.android.rivchat.model.ListFriend;
-import com.android.rivchat.service.ServiceUtils;
+import com.android.razgovor.R;
+import com.android.razgovor.data.FriendDB;
+import com.android.razgovor.data.StaticConfig;
+import com.android.razgovor.model.Friend;
+import com.android.razgovor.model.ListFriend;
+import com.android.razgovor.service.ServiceUtils;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;

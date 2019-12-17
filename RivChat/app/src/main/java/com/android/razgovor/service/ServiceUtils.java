@@ -1,4 +1,4 @@
-package com.android.rivchat.service;
+package com.android.razgovor.service;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -12,10 +12,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.android.rivchat.data.SharedPreferenceHelper;
-import com.android.rivchat.data.StaticConfig;
-import com.android.rivchat.model.Friend;
-import com.android.rivchat.model.ListFriend;
+import com.android.razgovor.data.SharedPreferenceHelper;
+import com.android.razgovor.data.StaticConfig;
+import com.android.razgovor.model.Friend;
+import com.android.razgovor.model.ListFriend;
 
 import java.util.HashMap;
 

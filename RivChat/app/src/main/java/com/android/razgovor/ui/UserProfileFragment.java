@@ -1,4 +1,4 @@
-package com.android.rivchat.ui;
+package com.android.razgovor.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,15 +34,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.android.rivchat.R;
-import com.android.rivchat.data.FriendDB;
-import com.android.rivchat.data.GroupDB;
-import com.android.rivchat.data.SharedPreferenceHelper;
-import com.android.rivchat.data.StaticConfig;
-import com.android.rivchat.model.Configuration;
-import com.android.rivchat.model.User;
-import com.android.rivchat.service.ServiceUtils;
-import com.android.rivchat.util.ImageUtils;
+import com.android.razgovor.R;
+import com.android.razgovor.data.FriendDB;
+import com.android.razgovor.data.GroupDB;
+import com.android.razgovor.data.SharedPreferenceHelper;
+import com.android.razgovor.data.StaticConfig;
+import com.android.razgovor.model.Configuration;
+import com.android.razgovor.model.User;
+import com.android.razgovor.service.ServiceUtils;
+import com.android.razgovor.util.ImageUtils;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 

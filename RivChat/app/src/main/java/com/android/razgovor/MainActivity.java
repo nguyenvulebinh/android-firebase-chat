@@ -1,4 +1,4 @@
-package com.android.rivchat;
+package com.android.razgovor;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,12 +19,12 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.android.rivchat.data.StaticConfig;
-import com.android.rivchat.service.ServiceUtils;
-import com.android.rivchat.ui.FriendsFragment;
-import com.android.rivchat.ui.GroupFragment;
-import com.android.rivchat.ui.LoginActivity;
-import com.android.rivchat.ui.UserProfileFragment;
+import com.android.razgovor.data.StaticConfig;
+import com.android.razgovor.service.ServiceUtils;
+import com.android.razgovor.ui.FriendsFragment;
+import com.android.razgovor.ui.GroupFragment;
+import com.android.razgovor.ui.LoginActivity;
+import com.android.razgovor.ui.UserProfileFragment;
 
 import java.util.ArrayList;
 import java.util.List;
