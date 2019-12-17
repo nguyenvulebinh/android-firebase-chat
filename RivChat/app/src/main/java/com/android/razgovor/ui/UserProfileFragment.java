@@ -89,18 +89,20 @@ public class UserProfileFragment extends Fragment {
             listConfig.clear();
             myAccount = dataSnapshot.getValue(User.class);
 
-            setupArrayListInfo(myAccount);
-            if(infoAdapter != null){
-                infoAdapter.notifyDataSetChanged();
-            }
+            if(myAccount != null) {
+                setupArrayListInfo(myAccount);
+                if (infoAdapter != null) {
+                    infoAdapter.notifyDataSetChanged();
+                }
 
-            if(tvUserName != null){
-                tvUserName.setText(myAccount.name);
-            }
+                if (tvUserName != null) {
+                    tvUserName.setText(myAccount.name);
+                }
 
-            setImageAvatar(context, myAccount.avata);
-            SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
-            preferenceHelper.saveUserInfo(myAccount);
+                setImageAvatar(context, myAccount.avata);
+                SharedPreferenceHelper preferenceHelper = SharedPreferenceHelper.getInstance(context);
+                preferenceHelper.saveUserInfo(myAccount);
+            }
         }
 
         @Override
