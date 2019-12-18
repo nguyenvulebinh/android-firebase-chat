@@ -1,52 +1,45 @@
 {
   "project_info": {
-    "project_number": "357675964227",
-    "firebase_url": "https://rivchat-eb69c.firebaseio.com",
-    "project_id": "rivchat-eb69c",
-    "storage_bucket": "rivchat-eb69c.appspot.com"
+    "project_number": "311596544973",
+    "firebase_url": "https://cnproject-6704d.firebaseio.com",
+    "project_id": "cnproject-6704d",
+    "storage_bucket": "cnproject-6704d.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:357675964227:android:374b4af11ea6d701",
+        "mobilesdk_app_id": "1:311596544973:android:4ec0bdab2011b26116ca84",
         "android_client_info": {
-          "package_name": "com.hieuapp.rivchat"
+          "package_name": "com.android.razgovor"
         }
       },
       "oauth_client": [
         {
-          "client_id": "357675964227-8k3uj39jsn36map74gn34t5n1bbtps6d.apps.googleusercontent.com",
+          "client_id": "311596544973-72f88bg8c4khchmh7vsepnfbki3387n3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.hieuapp.rivchat",
-            "certificate_hash": "68457BA3214EEBB103F2BD35ECD6E5172EB173C0"
+            "package_name": "com.android.razgovor",
+            "certificate_hash": "b847712cb23ee6ab20dc1127ea4aa66c78b19cbb"
           }
         },
         {
-          "client_id": "357675964227-q4vcq0d64m2bvdqcjjgak5gveps4ls1p.apps.googleusercontent.com",
+          "client_id": "311596544973-mc3k6uh14seq0e8qnfprisj2fggboil4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDWvMsxHRl0T0ITUK_aF1Dgw2f2UgfZNuM"
+          "current_key": "AIzaSyBhjGfAk1j2wo6bk8dsvP4RMxQxvtCxp2A"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "357675964227-q4vcq0d64m2bvdqcjjgak5gveps4ls1p.apps.googleusercontent.com",
+              "client_id": "311596544973-mc3k6uh14seq0e8qnfprisj2fggboil4.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
