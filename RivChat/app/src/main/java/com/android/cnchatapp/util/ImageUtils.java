@@ -1,4 +1,4 @@
-package com.android.razgovor.util;
+package com.android.cnchatapp.util;
 
 import android.content.Context;
 import android.content.res.Resources;

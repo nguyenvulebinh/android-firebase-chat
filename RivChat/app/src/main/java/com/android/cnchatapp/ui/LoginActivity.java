@@ -1,4 +1,4 @@
-package com.android.razgovor.ui;
+package com.android.cnchatapp.ui;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -22,11 +22,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.android.razgovor.MainActivity;
-import com.android.razgovor.R;
-import com.android.razgovor.data.SharedPreferenceHelper;
-import com.android.razgovor.data.StaticConfig;
-import com.android.razgovor.model.User;
+import com.android.cnchatapp.MainActivity;
+import com.android.cnchatapp.R;
+import com.android.cnchatapp.data.SharedPreferenceHelper;
+import com.android.cnchatapp.data.StaticConfig;
+import com.android.cnchatapp.model.User;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 

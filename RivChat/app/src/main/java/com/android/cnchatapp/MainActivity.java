@@ -1,4 +1,4 @@
-package com.android.razgovor;
+package com.android.cnchatapp;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,12 +19,12 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.android.razgovor.data.StaticConfig;
-import com.android.razgovor.service.ServiceUtils;
-import com.android.razgovor.ui.FriendsFragment;
-import com.android.razgovor.ui.GroupFragment;
-import com.android.razgovor.ui.LoginActivity;
-import com.android.razgovor.ui.UserProfileFragment;
+import com.android.cnchatapp.data.StaticConfig;
+import com.android.cnchatapp.service.ServiceUtils;
+import com.android.cnchatapp.ui.FriendsFragment;
+import com.android.cnchatapp.ui.GroupFragment;
+import com.android.cnchatapp.ui.LoginActivity;
+import com.android.cnchatapp.ui.UserProfileFragment;
 
 import java.util.ArrayList;
 import java.util.List;

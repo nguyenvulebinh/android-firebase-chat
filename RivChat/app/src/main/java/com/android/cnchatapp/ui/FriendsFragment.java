@@ -1,4 +1,4 @@
-package com.android.razgovor.ui;
+package com.android.cnchatapp.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,12 +34,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.android.razgovor.R;
-import com.android.razgovor.data.FriendDB;
-import com.android.razgovor.data.StaticConfig;
-import com.android.razgovor.model.Friend;
-import com.android.razgovor.model.ListFriend;
-import com.android.razgovor.service.ServiceUtils;
+import com.android.cnchatapp.R;
+import com.android.cnchatapp.data.FriendDB;
+import com.android.cnchatapp.data.StaticConfig;
+import com.android.cnchatapp.model.Friend;
+import com.android.cnchatapp.model.ListFriend;
+import com.android.cnchatapp.service.ServiceUtils;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;

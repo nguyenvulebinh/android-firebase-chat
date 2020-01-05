@@ -1,4 +1,4 @@
-package com.android.razgovor.model;
+package com.android.cnchatapp.model;
 
 
 

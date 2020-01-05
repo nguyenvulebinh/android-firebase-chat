@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.razgovor">
+    package="com.android.cnchatapp">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -13,13 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.android.razgovor.MainActivity"
+            android:name="com.android.cnchatapp.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
-            android:name="com.android.razgovor.ui.LoginActivity"
+            android:name="com.android.cnchatapp.ui.LoginActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/TranslucentBackground">
@@ -30,17 +30,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.android.razgovor.ui.RegisterActivity"
+            android:name="com.android.cnchatapp.ui.RegisterActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Translucent" />
         <activity
-            android:name="com.android.razgovor.ui.ChatActivity"
+            android:name="com.android.cnchatapp.ui.ChatActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName="com.android.razgovor.MainActivity"/>
-        <activity android:name="com.android.razgovor.ui.AddGroupActivity"
+            android:parentActivityName="com.android.cnchatapp.MainActivity"/>
+        <activity android:name="com.android.cnchatapp.ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar"/>
-        <service android:name="com.android.razgovor.service.FriendChatService"
+        <service android:name="com.android.cnchatapp.service.FriendChatService"
             android:exported="false"
             android:persistent= "true" />
     </application>

@@ -1,4 +1,4 @@
-package com.android.razgovor.service;
+package com.android.cnchatapp.service;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -12,10 +12,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.android.razgovor.data.SharedPreferenceHelper;
-import com.android.razgovor.data.StaticConfig;
-import com.android.razgovor.model.Friend;
-import com.android.razgovor.model.ListFriend;
+import com.android.cnchatapp.data.SharedPreferenceHelper;
+import com.android.cnchatapp.data.StaticConfig;
+import com.android.cnchatapp.model.Friend;
+import com.android.cnchatapp.model.ListFriend;
 
 import java.util.HashMap;
 

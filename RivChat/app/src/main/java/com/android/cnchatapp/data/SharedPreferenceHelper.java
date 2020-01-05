@@ -1,9 +1,9 @@
-package com.android.razgovor.data;
+package com.android.cnchatapp.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.razgovor.model.User;
+import com.android.cnchatapp.model.User;
 
 
 

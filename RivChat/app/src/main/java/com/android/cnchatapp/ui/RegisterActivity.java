@@ -1,4 +1,4 @@
-package com.android.razgovor.ui;
+package com.android.cnchatapp.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -16,8 +16,8 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.razgovor.R;
-import com.android.razgovor.data.StaticConfig;
+import com.android.cnchatapp.R;
+import com.android.cnchatapp.data.StaticConfig;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

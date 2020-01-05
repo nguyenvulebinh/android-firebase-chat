@@ -1,4 +1,4 @@
-package com.android.razgovor.ui;
+package com.android.cnchatapp.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,13 +26,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.FirebaseDatabase;
-import com.android.razgovor.R;
-import com.android.razgovor.data.FriendDB;
-import com.android.razgovor.data.GroupDB;
-import com.android.razgovor.data.StaticConfig;
-import com.android.razgovor.model.Group;
-import com.android.razgovor.model.ListFriend;
-import com.android.razgovor.model.Room;
+import com.android.cnchatapp.R;
+import com.android.cnchatapp.data.FriendDB;
+import com.android.cnchatapp.data.GroupDB;
+import com.android.cnchatapp.data.StaticConfig;
+import com.android.cnchatapp.model.Group;
+import com.android.cnchatapp.model.ListFriend;
+import com.android.cnchatapp.model.Room;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 

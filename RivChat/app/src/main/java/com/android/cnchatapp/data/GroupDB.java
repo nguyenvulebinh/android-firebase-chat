@@ -1,4 +1,4 @@
-package com.android.razgovor.data;
+package com.android.cnchatapp.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import com.android.razgovor.model.Group;
+import com.android.cnchatapp.model.Group;
 
 import java.util.ArrayList;
 import java.util.HashMap;
