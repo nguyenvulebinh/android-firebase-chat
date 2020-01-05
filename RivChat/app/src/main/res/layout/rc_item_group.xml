@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
-            android:text="Rivchat team"
+            android:text="DSA team"
             android:ellipsize="end"
             android:lines="1"
             android:layout_below="@id/icon_group"
