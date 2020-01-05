@@ -67,7 +67,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private CountDownTimer detectFriendOnline;
     public static int ACTION_START_CHAT = 1;
 
-    public static final String ACTION_DELETE_FRIEND = "com.android.rivchat.DELETE_FRIEND";
+    public static final String ACTION_DELETE_FRIEND = "com.android.cnchatapp.DELETE_FRIEND";
 
     private BroadcastReceiver deleteFriendReceiver;
 
@@ -203,17 +203,16 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     .setConfirmButton(android.R.string.ok, new LovelyTextInputDialog.OnTextInputConfirmListener() {
                         @Override
                         public void onTextInputConfirmed(String text) {
-                            //Tim id user id
+                            //Find the user id
                             findIDEmail(text);
-                            //Check xem da ton tai ban ghi friend chua
-                            //Ghi them 1 ban ghi
+                            //Check to see if you recorded friend
                         }
                     })
                     .show();
         }
 
         /**
-         * TIm id cua email tren server
+         * Find your email id on the server
          *
          * @param email
          */
@@ -265,7 +264,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         /**
-         * Lay danh sach friend cua một UID
+         * Lay out the friend list for a UID
          */
         private void checkBeforAddFriend(final String idFriend, Friend userInfo) {
             dialogWait.setCancelable(false)
@@ -357,9 +356,6 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     }
 
-    /**
-     * Lay danh sach ban be tren server
-     */
     private void getListFriendUId() {
         FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -383,9 +379,6 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         });
     }
 
-    /**
-     * Truy cap bang user lay thong tin id nguoi dung
-     */
     private void getAllFriendInfo(final int index) {
         if (index == listFriendID.size()) {
             //save list friend
@@ -471,12 +464,12 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         idFriend.add(id);
                         intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
-                        ChatActivity.bitmapAvataFriend = new HashMap<>();
+                        ChatActivity.bitmapAvatarFriend = new HashMap<>();
                         if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                             byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
-                            ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                            ChatActivity.bitmapAvatarFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
                         } else {
-                            ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
+                            ChatActivity.bitmapAvatarFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
                         }
 
                         mapMark.put(id, null);
@@ -484,7 +477,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 });
 
-        //nhấn giữ để xóa bạn
+        // press and hold to delete
         ((View) ((ItemFriendViewHolder) holder).txtName.getParent().getParent().getParent())
                 .setOnLongClickListener(new View.OnLongClickListener() {
                     @Override

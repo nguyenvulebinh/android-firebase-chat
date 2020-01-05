@@ -141,9 +141,7 @@ public class AddGroupActivity extends AppCompatActivity {
         //Delete group
         final String idGroup = groupEdit.id;
         Room room = new Room();
-        for (String id : listIDChoose) {
-            room.member.add(id);
-        }
+        room.member.addAll(listIDChoose);
         room.groupInfo.put("name", editTextGroupName.getText().toString());
         room.groupInfo.put("admin", StaticConfig.UID);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room)
@@ -190,9 +188,7 @@ public class AddGroupActivity extends AppCompatActivity {
 
         final String idGroup = (StaticConfig.UID + System.currentTimeMillis()).hashCode() + "";
         Room room = new Room();
-        for (String id : listIDChoose) {
-            room.member.add(id);
-        }
+        room.member.addAll(listIDChoose);
         room.groupInfo.put("name", editTextGroupName.getText().toString());
         room.groupInfo.put("admin", StaticConfig.UID);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -300,7 +296,7 @@ class ListPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private boolean isEdit;
     private Group editGroup;
 
-    public ListPeopleAdapter(Context context, ListFriend listFriend, LinearLayout btnAddGroup, Set<String> listIDChoose, Set<String> listIDRemove, boolean isEdit, Group editGroup) {
+    ListPeopleAdapter(Context context, ListFriend listFriend, LinearLayout btnAddGroup, Set<String> listIDChoose, Set<String> listIDRemove, boolean isEdit, Group editGroup) {
         this.context = context;
         this.listFriend = listFriend;
         this.btnAddGroup = btnAddGroup;

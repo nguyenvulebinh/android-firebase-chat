@@ -19,13 +19,13 @@ public class ImageUtils {
     public static final int AVATAR_HEIGHT = 128;
 
     /**
-     * Bo tròn ảnh avatar
+     * Rounded avatar image
      * @param context
-     * @param src ảnh dạng bitmap
-     * @return RoundedBitmapDrawable là đầu vào cho hàm setImageDrawable()
+     * @param src bitmap image
+     * @return RoundedBitmapDrawable is the input to the setImageDrawable () function.
      */
     public static RoundedBitmapDrawable roundedImage(Context context, Bitmap src){
-        /*Bo tròn avatar*/
+        /* Round avatar */
         Resources res = context.getResources();
         RoundedBitmapDrawable dr =
                 RoundedBitmapDrawableFactory.create(res, src);
@@ -35,8 +35,8 @@ public class ImageUtils {
     }
 
     /**
-     * Đối với ảnh hình chữ nhật thì cần cắt ảnh theo hình vuông và lấy phần tâm
-     * ảnh để khi đặt làm avatar sẽ không bị méo
+     * For rectangular images, you need to cut the image in a square and get the center
+     * Photos so that when placed as avatars will not be distorted
      * @param srcBmp
      * @return
      */
@@ -66,7 +66,7 @@ public class ImageUtils {
     }
 
     /**
-     * Convert ảnh dạng bitmap ra String base64
+     * Convert bitmap images to String base64
      * @param imgBitmap
      * @return
      */
@@ -78,10 +78,10 @@ public class ImageUtils {
     }
 
     /**
-     * Làm giảm số điểm ảnh xuống để tránh lỗi Firebase Database OutOfMemory
-     * @param is anh dau vao
-     * @param reqWidth kích thước chiều rộng sau khi giảm
-     * @param reqHeight kích thước chiều cao sau khi giảm
+     * Reduce the number of pixels to avoid the error Firebase Database OutOfMemory
+     * @param is your input
+     * @param reqWidth width size after reduction
+     * @param reqHeight size height after reduction
      * @return
      */
     public static Bitmap makeImageLite(InputStream is, int width, int height,

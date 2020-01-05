@@ -69,10 +69,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
     /**
-     * Khởi tạo các thành phần cần thiết cho việc quản lý đăng nhập
+     * Initialize the components needed for login management
      */
     private void initFirebase() {
-        //Khoi tao thanh phan de dang nhap, dang ky
         mAuth = FirebaseAuth.getInstance();
         authUtils = new AuthUtils();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -94,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        //Khoi tao dialog waiting khi dang nhap
+        //When the login dialog box opens, log in
         waitingDialog = new LovelyProgressDialog(this).setCancelable(false);
     }
 
@@ -158,9 +157,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Dinh nghia cac ham tien ich cho quas trinhf dang nhap, dang ky,...
-     */
     class AuthUtils {
         /**
          * Action register
@@ -332,7 +328,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         /**
-         * Luu thong tin user info cho nguoi dung dang nhap
+         * Save user info for logged in user
          */
         void saveUserInfo() {
             FirebaseDatabase.getInstance().getReference().child("user/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -355,7 +351,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         /**
-         * Khoi tao thong tin mac dinh cho tai khoan moi
+         * Initialize default information for new accounts
          */
         void initNewUserInfo() {
             User newUser = new User();

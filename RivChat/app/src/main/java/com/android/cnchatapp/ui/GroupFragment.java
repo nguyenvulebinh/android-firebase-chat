@@ -94,7 +94,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 .setTopColorRes(R.color.colorAccent);
 
         if(listGroup.size() == 0){
-            //Ket noi server hien thi group
+            //Connect to server display group
             mSwipeRefreshLayout.setRefreshing(true);
             getListGroup();
         }
@@ -107,9 +107,8 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
                     HashMap mapListGroup = (HashMap) dataSnapshot.getValue();
-                    Iterator iterator = mapListGroup.keySet().iterator();
-                    while (iterator.hasNext()){
-                        String idGroup = (String) mapListGroup.get(iterator.next().toString());
+                    for (Object o : mapListGroup.keySet()) {
+                        String idGroup = (String) mapListGroup.get(o.toString());
                         Group newGroup = new Group();
                         newGroup.id = idGroup;
                         listGroup.add(newGroup);
@@ -402,17 +401,17 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 Intent intent = new Intent(context, ChatActivity.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
                 ArrayList<CharSequence> idFriend = new ArrayList<>();
-                ChatActivity.bitmapAvataFriend = new HashMap<>();
+                ChatActivity.bitmapAvatarFriend = new HashMap<>();
                 for(String id : listGroup.get(position).member) {
                     idFriend.add(id);
                     String avata = listFriend.getAvataById(id);
                     if(!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                         byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
-                        ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                        ChatActivity.bitmapAvatarFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
                     }else if(avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
-                        ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
+                        ChatActivity.bitmapAvatarFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
                     }else {
-                        ChatActivity.bitmapAvataFriend.put(id, null);
+                        ChatActivity.bitmapAvatarFriend.put(id, null);
                     }
                 }
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
