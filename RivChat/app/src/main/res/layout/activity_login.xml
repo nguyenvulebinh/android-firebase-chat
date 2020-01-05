@@ -27,7 +27,7 @@
                     android:layout_width="8dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentStart="true"
-                    android:background="#2fa881" />
+                    android:background="#50E1A6" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="50dp"
                     android:text="@string/login"
-                    android:textColor="#FFCC00"
+                    android:textColor="#0099cc"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </RelativeLayout>
@@ -101,13 +101,16 @@
 
                 <Button
                     android:id="@+id/bt_go"
-                    android:layout_width="150dp"
+                    android:text="sign in"
+                    android:textSize="17sp"
+                    android:textColor="#0099cc"
+                    android:background="#00FFFF"
+                    android:layout_width="170dp"
                     android:layout_height="50dp"
-                    android:background="@drawable/bt_shape"
-                    android:stateListAnimator="@drawable/state_list_animator_z"
-                    android:text="@string/go"
-                    android:textColor="#d3d3d3"
-                    android:onClick="clickLogin"/>
+                    android:onClick="clickLogin"
+                    
+                    />
+
             </RelativeLayout>
 
             <TextView
